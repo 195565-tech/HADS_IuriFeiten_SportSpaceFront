@@ -4,7 +4,6 @@ import { ArrowLeft, Plus, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import Header from '../components/Header';
 
-const apiUrl = import.meta.env.VITE_API_URL;
 
 interface CreateLocal {
     nome: string;
