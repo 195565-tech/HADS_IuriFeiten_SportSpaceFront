@@ -88,48 +88,43 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // Função de Login
-  const login = async (email: string, password: string) => {
-    setLoading(true);
-    try {
-      const res = await fetch(`${apiUrl}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-        credentials: "include", // Importante para enviar e receber o cookie
-      });
+const login = async (email: string, password: string) => {
+  setLoading(true);
+  try {
+    const res = await fetch(`${apiUrl}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
 
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Login falhou. Verifique as credenciais.");
-      }
-
-      const data = await res.json();
-      setUser(data.user);
-
-    } catch (err: any) {
-      console.error("Erro no login:", err);
-      throw new Error(err.message || "Erro desconhecido no login.");
-    } finally {
-      setLoading(false);
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "Login falhou. Verifique as credenciais.");
     }
-  };
+
+    const data = await res.json();
+
+    // 🔑 Se o servidor retorna um token, salva localmente
+    if (data.token) {
+      localStorage.setItem('token', data.token);
+    }
+
+    setUser(data.user);
+  } catch (err: any) {
+    console.error("Erro no login:", err);
+    throw new Error(err.message || "Erro desconhecido no login.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   // Função de Logout
-  const logout = async () => {
-    try {
-      // Não precisa de credenciais no body, mas precisa do cookie para o servidor
-      // saber qual sessão encerrar
-      await fetch(`${apiUrl}/api/auth/logout`, {
-        method: "POST",
-        credentials: "include", 
-      });
-      setUser(null);
-    } catch (err) {
-      console.error("Erro ao fazer logout:", err);
-      // Mesmo com erro de API, forçamos o logout no cliente
-      setUser(null);
-    }
-  };
+const logout = async () => {
+  localStorage.removeItem('token');
+  setUser(null);
+};
+
 
   const value = {
     user,
