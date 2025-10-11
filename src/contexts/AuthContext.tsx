@@ -53,6 +53,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const response = await api.post('/api/login', { email, senha });
       setUser(response.data.user);
+      console.log('o retorno: ', response)
        if (response.data.token) {
       localStorage.setItem('token', response.data.token);
     }
