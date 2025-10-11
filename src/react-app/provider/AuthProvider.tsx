@@ -103,9 +103,10 @@ const login = async (email: string, password: string) => {
     }
 
     const data = await res.json();
-
+    console.log('retorno no login: ', data)
     // 🔑 Se o servidor retorna um token, salva localmente
     if (data.token) {
+      console.log('gravou login')
       localStorage.setItem('token', data.token);
     }
 
