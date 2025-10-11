@@ -73,7 +73,8 @@ export default function CreateLocalPage() {
 
             console.log('Dados a enviar:', dataToSubmit); // Log de depuração
 
-            await api.post(`${apiUrl}/api/locais`, dataToSubmit);
+           const res =  await api.post(`/api/locais`, dataToSubmit);
+           console.log('o res ', res)
             console.log('Local cadastrado com sucesso!'); 
             navigate('/admin/locais');
         } catch (error: any) {
