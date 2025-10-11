@@ -53,6 +53,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const response = await api.post('/api/login', { email, senha });
       setUser(response.data.user);
+       if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+    }
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Erro no login');
     }
