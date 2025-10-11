@@ -4,6 +4,7 @@ import { ArrowLeft, Plus, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import Header from '../components/Header';
 
+const apiUrl = import.meta.env.VITE_API_URL;
 
 interface CreateLocal {
     nome: string;
@@ -72,7 +73,7 @@ export default function CreateLocalPage() {
 
             console.log('Dados a enviar:', dataToSubmit); // Log de depuração
 
-            await api.post('/api/locais', dataToSubmit);
+            await api.post(`${apiUrl}/api/locais`, dataToSubmit);
             console.log('Local cadastrado com sucesso!'); 
             navigate('/admin/locais');
         } catch (error: any) {
