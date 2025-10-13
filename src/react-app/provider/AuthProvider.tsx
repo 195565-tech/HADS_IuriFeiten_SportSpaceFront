@@ -77,6 +77,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       const data = await res.json();
+            console.log('o data', data)
+
       if (data.token) {
       console.log('gravou login')
       localStorage.setItem('token', data.token);
