@@ -77,6 +77,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       const data = await res.json();
+      if (data.token) {
+      console.log('gravou login')
+      localStorage.setItem('token', data.token);
+     }
+
       setUser(data.user);
       // Não faz mais o 'checkAuth' aqui, pois o servidor já retornou o usuário logado
     } catch (err: any) {
