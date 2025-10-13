@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, X, UploadCloud } from 'lucide-react'; // Adicionei UploadCloud
+import { ArrowLeft, X, UploadCloud } from 'lucide-react'; // Adicionei UploadCloud
 import { useAuth } from '../../contexts/AuthContext';
 import Header from '../components/Header';
 import api from '../../services/api';
@@ -116,7 +116,7 @@ export default function CreateLocalPage() {
             
             const res = await api.post(`/api/locais`, dataToSubmit);
             
-            console.log('Local cadastrado com sucesso!');
+            console.log('Local cadastrado com sucesso!', res);
             navigate('/admin/locais');
         } catch (error: any) {
             console.error('Erro de rede ou ao enviar formulário:', error);
