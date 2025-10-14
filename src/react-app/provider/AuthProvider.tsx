@@ -4,7 +4,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
 // Defina a interface para o objeto de usuário (user)
 interface User {
   user_id: string;
-  user_type: 'user' | 'admin';
+  user_type: 'user' | 'admin' | 'owner';
   // Adicione outras propriedades do usuário que você usa, como nome ou id
   // id: number; 
 }
