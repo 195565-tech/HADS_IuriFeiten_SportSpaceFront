@@ -113,9 +113,14 @@ export default function CreateLocalPage() {
             // Além disso, o Axios deve definir o Content-Type como 'multipart/form-data'
             // O axios geralmente faz isso automaticamente ao detectar o FormData, mas se precisar forçar:
             // await api.post(`/api/locais`, dataToSubmit, { headers: { 'Content-Type': 'multipart/form-data' } });
-            
-            const res = await api.post(`/api/locais`, dataToSubmit);
-            
+            const token = localStorage.getItem('token'); // ou user?.token, dependendo de onde você o guarda
+
+            const res = await api.post(`/api/locais`, dataToSubmit, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'multipart/form-data',
+            },
+            });
             console.log('Local cadastrado com sucesso!', res);
             navigate('/admin/locais');
         } catch (error: any) {
