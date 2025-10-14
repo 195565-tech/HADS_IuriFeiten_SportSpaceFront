@@ -22,7 +22,7 @@ export default function Header() {
                 >
                   Minhas Reservas
                 </Link>
-                {user.user_type === 'admin' && (
+                {(user?.user_type === 'admin' || user?.user_type === 'owner') && (
                   <Link
                     to="/admin/locais"
                     className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"

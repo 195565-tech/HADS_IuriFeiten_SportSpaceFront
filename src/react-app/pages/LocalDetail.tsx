@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, MapPin, Phone, DollarSign, Calendar, Clock } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { ArrowLeft, MapPin, Phone, DollarSign, Calendar, Clock, Trash2, Edit } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/react-app/components/Header';
 import { Local } from '@/shared/types';
+
 const apiUrl = import.meta.env.VITE_API_URL;
 
 export default function LocalDetailPage() {
@@ -12,9 +13,11 @@ export default function LocalDetailPage() {
   const [local, setLocal] = useState<Local | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-  
+  const navigate = useNavigate();
+
   const isAdmin = user?.user_type === 'admin';
-  const canReserve = user && !isAdmin;
+  const isOwner = user?.user_type === 'owner';
+  const canReserve = user && !isAdmin && !isOwner;
 
   useEffect(() => {
     if (id) {
@@ -33,6 +36,31 @@ export default function LocalDetailPage() {
       console.error('Erro ao buscar local:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!local || !user) return;
+    if (!confirm('Tem certeza que deseja excluir este local?')) return;
+  const token = localStorage.getItem('token');
+
+    try {
+      const response = await fetch(`${apiUrl}/api/locais/${local.id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        alert('Local excluído com sucesso!');
+        navigate('/');
+      } else {
+        const data = await response.json();
+        alert(data.error || 'Erro ao excluir o local');
+      }
+    } catch (error) {
+      console.error('Erro ao excluir local:', error);
     }
   };
 
@@ -176,6 +204,34 @@ export default function LocalDetailPage() {
                     </div>
                   )}
                 </div>
+
+                {/* ⚙️ CONTROLE DE EDIÇÃO/EXCLUSÃO */}
+                {user && (isAdmin || isOwner) && (
+                  <>
+                    {(isAdmin || user.user_id === local.user_id) ? (
+                      <div className="flex space-x-4 mt-8">
+                        <Link
+                          to={`/admin/locais/${local.id}/editar`}
+                          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                          <Edit className="w-5 h-5 mr-2" />
+                          Editar
+                        </Link>
+                        <button
+                          onClick={handleDelete}
+                          className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                        >
+                          <Trash2 className="w-5 h-5 mr-2" />
+                          Deletar
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-500 mt-4 italic">
+                        Você pode visualizar este local, mas não tem permissão para editá-lo.
+                      </p>
+                    )}
+                  </>
+                )}
               </div>
 
               {/* Sidebar */}
@@ -234,10 +290,10 @@ export default function LocalDetailPage() {
                       </div>
                     )}
                     
-                    {isAdmin && (
+                    {(isAdmin || isOwner) && !canReserve && (
                       <div className="text-center p-4 bg-orange-50 rounded-lg">
                         <p className="text-sm text-orange-700">
-                          Administradores não podem fazer reservas
+                          Administradores e proprietários não podem fazer reservas
                         </p>
                       </div>
                     )}
