@@ -9,7 +9,7 @@ interface AdminRouteProps {
 export default function AdminRoute({ children }: AdminRouteProps) {
   const { user } = useAuth();
 
-  if (!user || user.user_type !== 'admin') {
+  if (!user || (user.user_type !== 'admin' && user.user_type !== 'owner')) {
     return <Navigate to="/" />;
   }
 
