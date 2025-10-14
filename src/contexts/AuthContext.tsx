@@ -56,6 +56,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   try {
    const response = await api.post('/api/login', { email, senha });
    setUser(response.data.user);
+    localStorage.setItem('token', response.data.token);
+
   } catch (error: any) {
    throw new Error(error.response?.data?.error || 'Erro no login');
   }
@@ -67,6 +69,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
    // Envia o user_type para o backend
    const response = await api.post('/api/register', { nome, email, senha, user_type });
    setUser(response.data.user);
+    localStorage.setItem('token', response.data.token);
+
   } catch (error: any) {
    throw new Error(error.response?.data?.error || 'Erro no cadastro');
   }
