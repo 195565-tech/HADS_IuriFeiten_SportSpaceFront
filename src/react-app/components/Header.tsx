@@ -12,17 +12,22 @@ export default function Header() {
           <Link to="/" className="flex items-center">
             <span className="text-2xl font-bold">🏀 SportSpace</span>
           </Link>
-          
+
           <nav className="flex items-center space-x-4">
             {user ? (
               <>
-                <Link
-                  to="/minhas-reservas"
-                  className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Minhas Reservas
-                </Link>
-                {(user?.user_type === 'admin' || user?.user_type === 'owner') && (
+                {/* Só mostra "Minhas Reservas" se NÃO for owner */}
+                {user?.user_type !== "owner" && (
+                  <Link
+                    to="/minhas-reservas"
+                    className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    Minhas Reservas
+                  </Link>
+                )}
+
+                {/* Mostra "Meus Locais" apenas para admin ou owner */}
+                {(user?.user_type === "admin" || user?.user_type === "owner") && (
                   <Link
                     to="/admin/locais"
                     className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
@@ -30,10 +35,13 @@ export default function Header() {
                     Meus Locais
                   </Link>
                 )}
+
                 <NotificationDropdown />
+
                 <span className="text-gray-300 px-3 py-2 text-sm">
                   Olá, <span className="font-medium">{user.nome}</span>
                 </span>
+
                 <button
                   onClick={logout}
                   className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
