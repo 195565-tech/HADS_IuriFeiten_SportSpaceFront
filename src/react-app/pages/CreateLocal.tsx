@@ -276,6 +276,7 @@ export default function CreateLocalPage() {
                                         id="valor_hora"
                                         name="valor_hora"
                                         min="0"
+                                        max="10000" 
                                         step="0.01"
                                         value={formData.valor_hora || ''}
                                         onChange={handleInputChange}
