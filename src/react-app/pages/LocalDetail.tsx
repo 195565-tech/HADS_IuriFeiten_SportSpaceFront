@@ -211,7 +211,7 @@ export default function LocalDetailPage() {
                     {(isAdmin || user.user_id === local.user_id) ? (
                       <div className="flex space-x-4 mt-8">
                         <Link
-                          to={`/admin/locais/${local.id}/editar`}
+                          to={`/locais/${local.id}/editar`}
                           className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                         >
                           <Edit className="w-5 h-5 mr-2" />
