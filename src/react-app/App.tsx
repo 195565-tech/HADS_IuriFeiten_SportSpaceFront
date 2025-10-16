@@ -31,10 +31,10 @@ function AppRoutes() {
       <Route path="/local/:id" element={<LocalDetailPage />} />
       <Route path="/reservar-local/:id" element={<ReservarLocalPage />} />
       <Route path="/minhas-reservas" element={<MinhasReservasPage />} />
-      
+      <Route path="/locais/:id/editar" element={<EditLocalPage />} />
+
       {/* Rotas protegidas para admin */}
       <Route path="/criar-local" element={<AdminRoute><CreateLocalPage /></AdminRoute>} />
-      <Route path="/editar-local/:id" element={<AdminRoute><EditLocalPage /></AdminRoute>} />
       <Route path="/admin/locais" element={<AdminRoute><AdminLocaisPage /></AdminRoute>} />
     </Routes>
   );
