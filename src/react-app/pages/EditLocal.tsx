@@ -138,7 +138,7 @@ export default function EditLocalPage() {
 
   // Verificar se o usuário é admin
   const extendedUser = user as ExtendedMochaUser;
-  const isAdmin = extendedUser?.profile?.user_type === 'admin';
+  const isAdmin = extendedUser?.profile?.user_type !== 'user' ;
   if (!isAdmin) {
     return (
       <div className="min-h-screen bg-gray-50">
