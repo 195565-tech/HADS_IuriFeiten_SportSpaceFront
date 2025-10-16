@@ -86,7 +86,9 @@ export default function EditLocalPage() {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'valor_hora' ? (value ? parseFloat(value) : undefined) : value
+      [name]: name === 'valor_hora' 
+        ? (value && !isNaN(Number(value)) ? Number(value) : undefined) 
+        : value
     }));
   };
 
@@ -120,8 +122,11 @@ export default function EditLocalPage() {
       dataToSubmit.append('esporte', formData.esporte);
       dataToSubmit.append('disponibilidade', formData.disponibilidade);
       dataToSubmit.append('telefone', formData.telefone);
-      if (formData.valor_hora !== undefined)
-        dataToSubmit.append('valorHora', formData.valor_hora.toString());
+
+      // Correção: conversão segura de valor_hora
+      if (formData.valor_hora != null && !isNaN(formData.valor_hora)) {
+        dataToSubmit.append('valorHora', String(formData.valor_hora));
+      }
 
       // URLs antigas (mantidas)
       const existingUrls = fotosArquivos
