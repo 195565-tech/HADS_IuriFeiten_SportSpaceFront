@@ -100,10 +100,11 @@ export default function EditLocalPage() {
         ...formData,
         fotos: fotosLimpas.length > 0 ? JSON.stringify(fotosLimpas) : undefined
       };
-
+      const token = localStorage.getItem('token'); // ou user?.token, dependendo de onde você o guarda
       const response = await fetch(`${apiUrl}/api/locais/${id}`, {
         method: 'PUT',
         headers: {
+            Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(dataToSubmit)
