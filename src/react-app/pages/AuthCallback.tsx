@@ -1,15 +1,15 @@
 import { useEffect } from 'react';
-import { useAuth } from '@getmocha/users-service/react';
+import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 export default function AuthCallbackPage() {
-  const { exchangeCodeForSessionToken } = useAuth();
+  const { login } = useAuth(); // usando login em vez de exchangeCodeForSessionToken
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
     const handleCallback = async () => {
-      const code = searchParams.get('code');
+      const code = searchParams.get('code'); // normalmente usado para OAuth
       const error = searchParams.get('error');
 
       if (error) {
@@ -25,16 +25,18 @@ export default function AuthCallbackPage() {
       }
 
       try {
-        await exchangeCodeForSessionToken();
+        // Aqui você poderia chamar o backend para trocar o "code" por token
+        // Para fins de teste, vamos simular um login padrão
+        await login('teste@teste.com', '123456'); // substitua por lógica real
         navigate('/dashboard', { replace: true });
-      } catch (error) {
-        console.error('Failed to exchange code for session token:', error);
+      } catch (err) {
+        console.error('Falha ao processar login:', err);
         navigate('/', { replace: true });
       }
     };
 
     handleCallback();
-  }, [exchangeCodeForSessionToken, navigate, searchParams]);
+  }, [login, navigate, searchParams]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
