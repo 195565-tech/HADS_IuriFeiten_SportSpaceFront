@@ -16,7 +16,7 @@ interface UpdateLocal {
 }
 
 interface FotoFile {
-  file: File;
+  file: File | null;
   preview: string;
 }
 
@@ -72,7 +72,7 @@ export default function EditLocalPage() {
 
         if (data.fotos) {
           const urls = JSON.parse(data.fotos) as string[];
-          setFotosArquivos(urls.map(url => ({ file: null as any, preview: url })));
+          setFotosArquivos(urls.map(url => ({ file: null, preview: url })));
         }
       } catch (err) {
         console.error('Erro ao carregar local:', err);
@@ -123,7 +123,13 @@ export default function EditLocalPage() {
       if (formData.valor_hora !== undefined)
         dataToSubmit.append('valorHora', formData.valor_hora.toString());
 
-      // Adiciona apenas os novos arquivos (ignora os que já são URLs)
+      // URLs antigas (mantidas)
+      const existingUrls = fotosArquivos
+        .filter(f => !f.file)
+        .map(f => f.preview);
+      dataToSubmit.append('fotosExistentes', JSON.stringify(existingUrls));
+
+      // Novos arquivos
       fotosArquivos.forEach(foto => {
         if (foto.file) {
           dataToSubmit.append('fotos', foto.file);
@@ -158,7 +164,7 @@ export default function EditLocalPage() {
 
   if (!user) return <Navigate to="/" replace />;
 
-if (String(localData.user_id) !== String(user.user_id)) {
+  if (String(localData.user_id) !== String(user.user_id)) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
@@ -194,7 +200,10 @@ if (String(localData.user_id) !== String(user.user_id)) {
 
         <h1 className="text-3xl font-bold text-gray-900 mb-6">Editar Local</h1>
 
-        <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-6 bg-white p-8 rounded-xl shadow-lg border border-gray-100"
+        >
           <div>
             <label htmlFor="nome" className="block text-sm font-semibold text-gray-700 mb-2">
               Nome do Local *
