@@ -18,7 +18,7 @@ export default function Dashboard() {
   const [reservas, setReservas] = useState<ReservaComId[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const isAdmin = user?.user_type === 'user' ||  user?.user_type === 'owner' || false;
+  const isAdmin = user?.user_type === 'admin' ||  user?.user_type === 'owner' || false;
 
   useEffect(() => {
     if (user) {
