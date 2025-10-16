@@ -17,11 +17,11 @@ export default function Dashboard() {
   const [reservas, setReservas] = useState<ReservaComId[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const isAdmin = user?.user_type === 'admin' || false;
+  const isAdmin = user?.user_type === 'user' || false;
 
   useEffect(() => {
     if (user) {
-      if (isAdmin) {
+      if (!isAdmin) {
         fetchMeusLocais();
       } else {
         fetchMinhasReservas();
