@@ -158,7 +158,7 @@ export default function EditLocalPage() {
 
   if (!user) return <Navigate to="/" replace />;
 
-  if (localData.user_id !== user.id) {
+if (String(localData.user_id) !== String(user.user_id)) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
