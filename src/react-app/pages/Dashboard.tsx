@@ -4,6 +4,7 @@ import { Navigate, Link } from 'react-router-dom';
 import { Plus, Edit, Trash2, Eye, MapPin, Calendar, Clock, X } from 'lucide-react';
 import Header from '@/react-app/components/Header';
 import { Local, Reserva } from '@/shared/types';
+import api from '@/services/api';
 const apiUrl = import.meta.env.VITE_API_URL;
 
 // Garantindo que id de Reserva nunca seja undefined
@@ -21,7 +22,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (user) {
-      if (!isAdmin) {
+      if (isAdmin) {
         fetchMeusLocais();
       } else {
         fetchMinhasReservas();
@@ -30,11 +31,15 @@ export default function Dashboard() {
   }, [user, isAdmin]);
 
   const fetchMeusLocais = async () => {
+   
     try {
-      const response = await fetch(`${apiUrl}/api/meus-locais`);
-      if (response.ok) {
-        const data = await response.json();
-        setLocais(data);
+      const response = await api.get('/api/locais');
+      if (response) {
+        const meusLocais = response.data.filter((local: Local) => 
+        local.user_id === user?.user_id
+      );
+      setLocais(meusLocais);
+
       }
     } catch (error) {
       console.error('Erro ao buscar locais:', error);
