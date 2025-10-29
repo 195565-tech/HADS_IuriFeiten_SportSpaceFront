@@ -36,6 +36,16 @@ export default function Header() {
                   </Link>
                 )}
 
+                {/* ADICIONADO: Link de Aprovações apenas para admin */}
+                {user?.user_type === "admin" && (
+                  <Link
+                    to="/aprovacao"
+                    className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    Aprovações
+                  </Link>
+                )}
+
                 <NotificationDropdown />
 
                 <span className="text-gray-300 px-3 py-2 text-sm">

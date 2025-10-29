@@ -13,6 +13,8 @@ import LocalDetailPage from "@/react-app/pages/LocalDetail";
 import ReservarLocalPage from "@/react-app/pages/ReservarLocal";
 import MinhasReservasPage from "@/react-app/pages/MinhasReservas";
 import AdminLocaisPage from "@/react-app/pages/AdminLocais";
+import AprovacaoPage from "@/react-app/pages/Aprovacao"; // IMPORTAÇÃO ADICIONADA
+
 
 function AppRoutes() {
   const { loading } = useAuth();
@@ -36,6 +38,7 @@ function AppRoutes() {
       {/* Rotas protegidas para admin */}
       <Route path="/criar-local" element={<AdminRoute><CreateLocalPage /></AdminRoute>} />
       <Route path="/admin/locais" element={<AdminRoute><AdminLocaisPage /></AdminRoute>} />
+      <Route path="/aprovacao" element={<AdminRoute><AprovacaoPage /></AdminRoute>} /> {/* ROTA ADICIONADA */}
     </Routes>
   );
 }

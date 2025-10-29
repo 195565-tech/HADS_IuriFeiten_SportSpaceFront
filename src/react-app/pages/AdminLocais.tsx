@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import Header from '@/react-app/components/Header';
 
+
 interface Local {
   id: number;
   nome: string;
@@ -14,8 +15,10 @@ interface Local {
   disponibilidade?: string;
   telefone?: string;
   user_id?: string;
+  status_aprovacao?: 'pendente' | 'aprovado' | 'reprovado';
   created_at: string;
 }
+
 
 export default function AdminLocais() {
   const [locais, setLocais] = useState<Local[]>([]);
@@ -23,20 +26,20 @@ export default function AdminLocais() {
   const [error, setError] = useState('');
   const { user } = useAuth();
 
+
   useEffect(() => {
     if (user) {
       fetchLocais();
     }
   }, [user]);
 
+
   const fetchLocais = async () => {
     try {
-      const response = await api.get('/api/locais');
-      // Filtrar apenas os locais criados pelo usuário atual
-      const meusLocais = response.data.filter((local: Local) => 
-        local.user_id === user?.user_id
-      );
-      setLocais(meusLocais);
+      // MODIFICADO: Chamada para endpoint específico que retorna locais do usuário
+      const response = await api.get('/api/locais/meus');
+      // Não é mais necessário filtrar manualmente, o backend já faz isso
+      setLocais(response.data);
     } catch (err: any) {
       setError('Erro ao carregar locais');
     } finally {
@@ -44,8 +47,10 @@ export default function AdminLocais() {
     }
   };
 
+
   const deletarLocal = async (id: number) => {
     if (!confirm('Tem certeza que deseja excluir este local?')) return;
+
 
     try {
       await api.delete(`/api/locais/${id}`);
@@ -54,6 +59,7 @@ export default function AdminLocais() {
       setError('Erro ao excluir local');
     }
   };
+
 
   if (!user) {
     return (
@@ -72,6 +78,7 @@ export default function AdminLocais() {
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -92,11 +99,13 @@ export default function AdminLocais() {
           </Link>
         </div>
 
+
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded mb-6">
             {error}
           </div>
         )}
+
 
         {loading ? (
           <div className="flex justify-center items-center py-20">
@@ -122,9 +131,22 @@ export default function AdminLocais() {
             {locais.map((local) => (
               <div key={local.id} className="bg-white rounded-lg shadow p-6">
                 <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-lg font-medium text-gray-900">
-                    {local.nome}
-                  </h3>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-medium text-gray-900">
+                      {local.nome}
+                    </h3>
+                    {/* Badge de status */}
+                    {local.status_aprovacao === 'pendente' && (
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 mt-2">
+                        🕐 Aguardando aprovação
+                      </span>
+                    )}
+                    {local.status_aprovacao === 'aprovado' && (
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 mt-2">
+                        ✓ Aprovado
+                      </span>
+                    )}
+                  </div>
                   <div className="flex space-x-2">
                     <Link
                       to={`/editar-local/${local.id}`}
