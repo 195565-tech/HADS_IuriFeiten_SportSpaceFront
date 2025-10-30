@@ -27,6 +27,8 @@ export default function Aprovacao() {
   useEffect(() => {
     if (user && user.user_type === 'admin') {
       fetchLocaisPendentes();
+    } else if (user && user.user_type !== 'admin') {
+      setLoading(false);
     }
   }, [user]);
 
@@ -38,7 +40,7 @@ export default function Aprovacao() {
       setError('');
     } catch (err: any) {
       setError('Erro ao carregar locais pendentes');
-      console.error(err);
+      console.error('Erro ao buscar pendentes:', err);
     } finally {
       setLoading(false);
     }
@@ -49,9 +51,9 @@ export default function Aprovacao() {
 
     try {
       setProcessando(id);
-      await api.patch(`/api/locais/${id}/aprovar`, {
-        status_aprovacao: 'aprovado'
-      });
+      setError('');
+      
+      await api.patch(`/api/locais/${id}/aprovar`);
       
       // Remove o local da lista após aprovação
       setLocaisPendentes(locaisPendentes.filter(l => l.id !== id));
@@ -59,8 +61,9 @@ export default function Aprovacao() {
       // Exibe mensagem de sucesso
       alert('Local aprovado com sucesso!');
     } catch (err: any) {
-      setError('Erro ao aprovar local');
-      console.error(err);
+      const errorMsg = err.response?.data?.error || 'Erro ao aprovar local';
+      setError(errorMsg);
+      console.error('Erro ao aprovar:', err);
     } finally {
       setProcessando(null);
     }
@@ -71,6 +74,8 @@ export default function Aprovacao() {
 
     try {
       setProcessando(id);
+      setError('');
+      
       await api.delete(`/api/locais/${id}/reprovar`);
       
       // Remove o local da lista após reprovação
@@ -79,8 +84,9 @@ export default function Aprovacao() {
       // Exibe mensagem de sucesso
       alert('Local reprovado e removido da base de dados.');
     } catch (err: any) {
-      setError('Erro ao reprovar local');
-      console.error(err);
+      const errorMsg = err.response?.data?.error || 'Erro ao reprovar local';
+      setError(errorMsg);
+      console.error('Erro ao reprovar:', err);
     } finally {
       setProcessando(null);
     }
