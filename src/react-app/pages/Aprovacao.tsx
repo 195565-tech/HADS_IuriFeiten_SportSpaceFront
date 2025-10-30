@@ -55,10 +55,8 @@ export default function Aprovacao() {
       
       await api.patch(`/api/locais/${id}/aprovar`);
       
-      // Remove o local da lista após aprovação
       setLocaisPendentes(locaisPendentes.filter(l => l.id !== id));
       
-      // Exibe mensagem de sucesso
       alert('Local aprovado com sucesso!');
     } catch (err: any) {
       const errorMsg = err.response?.data?.error || 'Erro ao aprovar local';
@@ -78,10 +76,8 @@ export default function Aprovacao() {
       
       await api.delete(`/api/locais/${id}/reprovar`);
       
-      // Remove o local da lista após reprovação
       setLocaisPendentes(locaisPendentes.filter(l => l.id !== id));
       
-      // Exibe mensagem de sucesso
       alert('Local reprovado e removido da base de dados.');
     } catch (err: any) {
       const errorMsg = err.response?.data?.error || 'Erro ao reprovar local';
@@ -92,7 +88,12 @@ export default function Aprovacao() {
     }
   };
 
-  // Verifica se o usuário é admin
+  // Função auxiliar para formatar valor
+  const formatarValor = (valor: any): string => {
+    const num = typeof valor === 'string' ? parseFloat(valor) : valor;
+    return !isNaN(num) && num != null ? num.toFixed(2) : '0.00';
+  };
+
   if (!user || user.user_type !== 'admin') {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -156,7 +157,6 @@ export default function Aprovacao() {
               {locaisPendentes.map((local) => (
                 <div key={local.id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
                   <div className="p-6">
-                    {/* Badge de status */}
                     <div className="flex justify-between items-start mb-4">
                       <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                         🕐 Pendente
@@ -166,7 +166,6 @@ export default function Aprovacao() {
                       </span>
                     </div>
 
-                    {/* Informações do local */}
                     <h3 className="text-lg font-semibold text-gray-900 mb-3">
                       {local.nome}
                     </h3>
@@ -191,7 +190,7 @@ export default function Aprovacao() {
                         <p className="flex items-center">
                           <span className="mr-2">💰</span>
                           <span className="font-medium text-gray-900">
-                            R$ {local.valor_hora.toFixed(2)}/hora
+                            R$ {formatarValor(local.valor_hora)}/hora
                           </span>
                         </p>
                       )}
@@ -209,7 +208,6 @@ export default function Aprovacao() {
                       )}
                     </div>
 
-                    {/* Botões de ação */}
                     <div className="flex gap-3 pt-4 border-t border-gray-200">
                       <button
                         onClick={() => aprovarLocal(local.id)}

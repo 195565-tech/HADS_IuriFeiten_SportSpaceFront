@@ -4,7 +4,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import Header from '@/react-app/components/Header';
 
-
 interface Local {
   id: number;
   nome: string;
@@ -19,20 +18,17 @@ interface Local {
   created_at: string;
 }
 
-
 export default function AdminLocais() {
   const [locais, setLocais] = useState<Local[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { user } = useAuth();
 
-
   useEffect(() => {
     if (user) {
       fetchLocais();
     }
   }, [user]);
-
 
   const fetchLocais = async () => {
     try {
@@ -47,10 +43,8 @@ export default function AdminLocais() {
     }
   };
 
-
   const deletarLocal = async (id: number) => {
     if (!confirm('Tem certeza que deseja excluir este local?')) return;
-
 
     try {
       await api.delete(`/api/locais/${id}`);
@@ -60,6 +54,11 @@ export default function AdminLocais() {
     }
   };
 
+  // Função auxiliar para formatar valor
+  const formatarValor = (valor: any): string => {
+    const num = typeof valor === 'string' ? parseFloat(valor) : valor;
+    return !isNaN(num) && num != null ? num.toFixed(2) : '0.00';
+  };
 
   if (!user) {
     return (
@@ -78,7 +77,6 @@ export default function AdminLocais() {
       </div>
     );
   }
-
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -99,13 +97,11 @@ export default function AdminLocais() {
           </Link>
         </div>
 
-
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded mb-6">
             {error}
           </div>
         )}
-
 
         {loading ? (
           <div className="flex justify-center items-center py-20">
@@ -174,7 +170,7 @@ export default function AdminLocais() {
                     <p>🏃 {local.esporte}</p>
                   )}
                   {local.valor_hora && (
-                    <p>💰 R$ {local.valor_hora}/hora</p>
+                    <p>💰 R$ {formatarValor(local.valor_hora)}/hora</p>
                   )}
                   {local.telefone && (
                     <p>📞 {local.telefone}</p>
