@@ -36,7 +36,17 @@ export default function Header() {
                   </Link>
                 )}
 
-                {/* ADICIONADO: Link de Aprovações apenas para admin */}
+                {/* ✅ ADICIONADO: Link de Dashboard/Relatório para admin e owner */}
+                {(user?.user_type === "admin" || user?.user_type === "owner") && (
+                  <Link
+                    to="/relatorio"
+                    className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    📊 Dashboard
+                  </Link>
+                )}
+
+                {/* Link de Aprovações apenas para admin */}
                 {user?.user_type === "admin" && (
                   <Link
                     to="/aprovacao"

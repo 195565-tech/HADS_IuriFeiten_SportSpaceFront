@@ -13,8 +13,8 @@ import LocalDetailPage from "@/react-app/pages/LocalDetail";
 import ReservarLocalPage from "@/react-app/pages/ReservarLocal";
 import MinhasReservasPage from "@/react-app/pages/MinhasReservas";
 import AdminLocaisPage from "@/react-app/pages/AdminLocais";
-import AprovacaoPage from "@/react-app/pages/Aprovacao"; // IMPORTAÇÃO ADICIONADA
-
+import AprovacaoPage from "@/react-app/pages/Aprovacao";
+import RelatorioPage from "@/react-app/pages/Relatorio"; // ✅ IMPORTAÇÃO ADICIONADA
 
 function AppRoutes() {
   const { loading } = useAuth();
@@ -25,6 +25,7 @@ function AppRoutes() {
 
   return (
     <Routes>
+      {/* Rotas públicas */}
       <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
@@ -35,10 +36,41 @@ function AppRoutes() {
       <Route path="/minhas-reservas" element={<MinhasReservasPage />} />
       <Route path="/locais/:id/editar" element={<EditLocalPage />} />
 
-      {/* Rotas protegidas para admin */}
-      <Route path="/criar-local" element={<AdminRoute><CreateLocalPage /></AdminRoute>} />
-      <Route path="/admin/locais" element={<AdminRoute><AdminLocaisPage /></AdminRoute>} />
-      <Route path="/aprovacao" element={<AdminRoute><AprovacaoPage /></AdminRoute>} /> {/* ROTA ADICIONADA */}
+      {/* Rotas protegidas para proprietários e administradores */}
+      <Route 
+        path="/criar-local" 
+        element={
+          <AdminRoute>
+            <CreateLocalPage />
+          </AdminRoute>
+        } 
+      />
+      <Route 
+        path="/admin/locais" 
+        element={
+          <AdminRoute>
+            <AdminLocaisPage />
+          </AdminRoute>
+        } 
+      />
+      <Route 
+        path="/aprovacao" 
+        element={
+          <AdminRoute>
+            <AprovacaoPage />
+          </AdminRoute>
+        } 
+      />
+      
+      {/* ✅ ROTA ADICIONADA - Dashboard de Reservas/Relatório */}
+      <Route 
+        path="/relatorio" 
+        element={
+          <AdminRoute>
+            <RelatorioPage />
+          </AdminRoute>
+        } 
+      />
     </Routes>
   );
 }
