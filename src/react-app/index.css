@@ -5,3 +5,48 @@
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
+
+/* Oculta os botões de navegação do calendário: Hoje, Anterior, Próximo */
+.rbc-toolbar button[title="Hoje"],
+.rbc-toolbar button[title="Anterior"],
+.rbc-toolbar button[title="Próximo"] {
+  display: none !important;
+}
+
+/* Opcional: ajustes visuais para o calendário */
+.rbc-calendar {
+  font-family: inherit;
+}
+
+.rbc-header {
+  padding: 10px 3px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.rbc-event {
+  padding: 2px 5px;
+  font-size: 13px;
+}
+
+.rbc-agenda-view {
+  font-size: 14px;
+}
+
+.rbc-agenda-table {
+  border: 1px solid #ddd;
+}
+
+.rbc-agenda-date-cell,
+.rbc-agenda-time-cell {
+  white-space: nowrap;
+  padding: 8px 10px;
+}
+
+.rbc-agenda-event-cell {
+  padding: 8px 10px;
+}
+
+.rbc-today {
+  background-color: #f0f9ff;
+}

@@ -36,13 +36,13 @@ export default function Header() {
                   </Link>
                 )}
 
-                {/* ✅ ADICIONADO: Link de Dashboard/Relatório para admin e owner */}
+                {/* ✅ ALTERADO: Dashboard SEM ícone, apenas texto */}
                 {(user?.user_type === "admin" || user?.user_type === "owner") && (
                   <Link
                     to="/relatorio"
                     className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
                   >
-                    📊 Dashboard
+                    Dashboard
                   </Link>
                 )}
 
