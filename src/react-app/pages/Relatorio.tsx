@@ -19,6 +19,14 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
+// Função para combinar data e hora em um objeto Date
+function montarDataHora(dataStr: string, horaStr: string): Date {
+  if (!dataStr || !horaStr) return new Date();
+  const [ano, mes, dia] = dataStr.split('-').map(Number);
+  const [hora, minuto, segundo] = horaStr.split(':').map(Number);
+  return new Date(ano, mes - 1, dia, hora, minuto, segundo || 0);
+}
+
 interface Local {
   id: number;
   nome: string;
@@ -29,8 +37,9 @@ interface Reserva {
   id: number;
   local_id: number;
   local_nome: string;
-  data_inicio: string;
-  data_fim: string;
+  data_reserva: string;
+  hora_inicio: string;
+  hora_fim: string;
   user_id: string;
   nome_usuario?: string;
 }
@@ -49,7 +58,7 @@ export default function Relatorio() {
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [view, setView] = useState<View>('week'); // Corrigido: sem "agenda"
+  const [view, setView] = useState<View>('week');
   const { user } = useAuth();
 
   useEffect(() => {
@@ -70,13 +79,11 @@ export default function Relatorio() {
     try {
       setLoading(true);
       let response;
-
       if (user?.user_type === 'admin') {
         response = await api.get('/api/locais');
       } else {
         response = await api.get('/api/locais/meus');
       }
-
       const locaisAprovados = response.data.filter(
         (local: any) => local.status_aprovacao === 'aprovado'
       );
@@ -94,7 +101,6 @@ export default function Relatorio() {
     try {
       setLoading(true);
       let url = '/api/reservas';
-
       if (localSelecionado !== 'todos') {
         url += `?local_id=${localSelecionado}`;
       } else if (user?.user_type === 'owner') {
@@ -103,7 +109,6 @@ export default function Relatorio() {
           url += `?locais_ids=${locaisIds}`;
         }
       }
-
       const response = await api.get(url);
       setReservas(response.data);
       setError('');
@@ -115,11 +120,12 @@ export default function Relatorio() {
     }
   };
 
+  // Mapeamento correto dos eventos para o calendário
   const eventos: CalendarEvent[] = reservas.map(reserva => ({
     id: reserva.id,
     title: `${reserva.local_nome} - ${reserva.nome_usuario || 'Usuário'}`,
-    start: new Date(reserva.data_inicio),
-    end: new Date(reserva.data_fim),
+    start: montarDataHora(reserva.data_reserva, reserva.hora_inicio),
+    end: montarDataHora(reserva.data_reserva, reserva.hora_fim),
     resource: reserva,
   }));
 
@@ -243,7 +249,7 @@ export default function Relatorio() {
                 style={{ height: '100%' }}
                 messages={messages}
                 eventPropGetter={eventStyleGetter}
-                views={['month', 'week', 'day']}          // <- nenhuma agenda!
+                views={['month', 'week', 'day']}
                 view={view}
                 onView={setView}
                 defaultView="week"
