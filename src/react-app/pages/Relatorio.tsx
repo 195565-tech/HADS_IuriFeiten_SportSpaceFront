@@ -11,7 +11,6 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 const locales = {
   'pt-BR': ptBR,
 };
-
 const localizer = dateFnsLocalizer({
   format,
   parse,
@@ -46,13 +45,11 @@ interface CalendarEvent {
 
 export default function Relatorio() {
   const [locais, setLocais] = useState<Local[]>([]);
-  const [localSelecionado, setLocalSelecionado] = useState<number | 'todos'>(
-    'todos'
-  );
+  const [localSelecionado, setLocalSelecionado] = useState<number | 'todos'>('todos');
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [view, setView] = useState<View>('agenda');
+  const [view, setView] = useState<View>('week'); // Corrigido: sem "agenda"
   const { user } = useAuth();
 
   useEffect(() => {
@@ -73,17 +70,16 @@ export default function Relatorio() {
     try {
       setLoading(true);
       let response;
-      
+
       if (user?.user_type === 'admin') {
         response = await api.get('/api/locais');
       } else {
         response = await api.get('/api/locais/meus');
       }
-      
+
       const locaisAprovados = response.data.filter(
         (local: any) => local.status_aprovacao === 'aprovado'
       );
-      
       setLocais(locaisAprovados);
       setError('');
     } catch (err: any) {
@@ -98,7 +94,7 @@ export default function Relatorio() {
     try {
       setLoading(true);
       let url = '/api/reservas';
-      
+
       if (localSelecionado !== 'todos') {
         url += `?local_id=${localSelecionado}`;
       } else if (user?.user_type === 'owner') {
@@ -107,7 +103,7 @@ export default function Relatorio() {
           url += `?locais_ids=${locaisIds}`;
         }
       }
-      
+
       const response = await api.get(url);
       setReservas(response.data);
       setError('');
@@ -135,7 +131,6 @@ export default function Relatorio() {
     month: 'Mês',
     week: 'Semana',
     day: 'Dia',
-    agenda: 'Agenda',
     date: 'Data',
     time: 'Hora',
     event: 'Reserva',
@@ -248,10 +243,10 @@ export default function Relatorio() {
                 style={{ height: '100%' }}
                 messages={messages}
                 eventPropGetter={eventStyleGetter}
-                views={['month', 'week', 'day', 'agenda']}
+                views={['month', 'week', 'day']}          // <- nenhuma agenda!
                 view={view}
                 onView={setView}
-                defaultView="agenda"
+                defaultView="week"
                 popup
                 culture="pt-BR"
                 tooltipAccessor={(event: CalendarEvent) =>
