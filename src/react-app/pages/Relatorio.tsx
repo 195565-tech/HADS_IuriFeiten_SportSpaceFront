@@ -7,19 +7,10 @@ import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
-// Configurar localizer com date-fns em português
-const locales = {
-  'pt-BR': ptBR,
-};
-const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek,
-  getDay,
-  locales,
-});
+const locales = { 'pt-BR': ptBR };
+const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales });
 
-// Função para combinar data e hora em um objeto Date
+// Função para combinar data e hora
 function montarDataHora(dataStr: string, horaStr: string): Date {
   if (!dataStr || !horaStr) return new Date();
   const [ano, mes, dia] = dataStr.split('-').map(Number);
@@ -70,15 +61,14 @@ export default function Relatorio() {
   }, [user]);
 
   useEffect(() => {
-    if (locais.length > 0) {
-      fetchReservas();
-    }
+    if (locais.length > 0) fetchReservas();
   }, [localSelecionado, locais]);
 
   const fetchLocais = async () => {
     try {
       setLoading(true);
       let response;
+
       if (user?.user_type === 'admin') {
         response = await api.get('/api/locais');
       } else {
@@ -91,7 +81,7 @@ export default function Relatorio() {
       setError('');
     } catch (err: any) {
       setError('Erro ao carregar locais');
-      console.error('Erro ao buscar locais:', err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -101,26 +91,26 @@ export default function Relatorio() {
     try {
       setLoading(true);
       let url = '/api/reservas';
+
       if (localSelecionado !== 'todos') {
         url += `?local_id=${localSelecionado}`;
       } else if (user?.user_type === 'owner') {
         const locaisIds = locais.map(l => l.id).join(',');
-        if (locaisIds) {
-          url += `?locais_ids=${locaisIds}`;
-        }
+        if (locaisIds) url += `?locais_ids=${locaisIds}`;
       }
+
       const response = await api.get(url);
       setReservas(response.data);
       setError('');
     } catch (err: any) {
       setError('Erro ao carregar reservas');
-      console.error('Erro ao buscar reservas:', err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Mapeamento correto dos eventos para o calendário
+  // Montar eventos para o calendário
   const eventos: CalendarEvent[] = reservas.map(reserva => ({
     id: reserva.id,
     title: `${reserva.local_nome} - ${reserva.nome_usuario || 'Usuário'}`,
@@ -144,18 +134,16 @@ export default function Relatorio() {
     showMore: (total: number) => `+ Ver mais (${total})`,
   };
 
-  const eventStyleGetter = () => {
-    return {
-      style: {
-        backgroundColor: '#3b82f6',
-        borderRadius: '5px',
-        opacity: 0.8,
-        color: 'white',
-        border: '0px',
-        display: 'block',
-      },
-    };
-  };
+  const eventStyleGetter = () => ({
+    style: {
+      backgroundColor: '#3b82f6',
+      borderRadius: '5px',
+      opacity: 0.8,
+      color: 'white',
+      border: '0px',
+      display: 'block',
+    },
+  });
 
   if (!user || (user.user_type !== 'owner' && user.user_type !== 'admin')) {
     return (
@@ -163,12 +151,8 @@ export default function Relatorio() {
         <Header />
         <div className="flex items-center justify-center py-20">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Acesso negado
-            </h2>
-            <p className="text-gray-600">
-              Apenas proprietários e administradores podem acessar o dashboard.
-            </p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Acesso negado</h2>
+            <p className="text-gray-600">Apenas proprietários e administradores podem acessar o dashboard.</p>
           </div>
         </div>
       </div>
@@ -180,40 +164,27 @@ export default function Relatorio() {
       <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Dashboard de Reservas
-          </h1>
-          <p className="mt-2 text-gray-600">
-            Visualize as reservas dos seus locais esportivos
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard de Reservas</h1>
+          <p className="mt-2 text-gray-600">Visualize as reservas dos seus locais esportivos</p>
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded mb-6">
-            {error}
-          </div>
+          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded mb-6">{error}</div>
         )}
 
         {locais.length > 1 && (
           <div className="mb-6 bg-white rounded-lg shadow p-4">
-            <label
-              htmlFor="local-filter"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
+            <label htmlFor="local-filter" className="block text-sm font-medium text-gray-700 mb-2">
               Filtrar por local:
             </label>
             <select
               id="local-filter"
               value={localSelecionado}
-              onChange={(e) =>
-                setLocalSelecionado(
-                  e.target.value === 'todos' ? 'todos' : Number(e.target.value)
-                )
-              }
+              onChange={e => setLocalSelecionado(e.target.value === 'todos' ? 'todos' : Number(e.target.value))}
               className="block w-full max-w-md px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="todos">Todos os locais</option>
-              {locais.map((local) => (
+              {locais.map(local => (
                 <option key={local.id} value={local.id}>
                   {local.nome}
                 </option>
@@ -222,63 +193,55 @@ export default function Relatorio() {
           </div>
         )}
 
-        {loading ? (
-          <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="bg-white rounded-lg shadow p-6" style={{ height: '700px' }}>
+            <Calendar
+              localizer={localizer}
+              events={eventos}
+              startAccessor="start"
+              endAccessor="end"
+              style={{ height: '100%' }}
+              messages={messages}
+              eventPropGetter={eventStyleGetter}
+              views={['month', 'week', 'day']}
+              view={view}
+              onView={setView}
+              defaultView="week"
+              popup
+              culture="pt-BR"
+              tooltipAccessor={event => `${event.resource.local_nome} - ${event.resource.nome_usuario || 'Usuário'}`}
+            />
           </div>
-        ) : locais.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-8 text-center">
-            <div className="text-6xl mb-4">📅</div>
-            <h3 className="text-xl font-medium text-gray-900 mb-2">
-              Nenhum local disponível
-            </h3>
-            <p className="text-gray-600">
-              {user.user_type === 'admin'
-                ? 'Não há locais aprovados no sistema.'
-                : 'Você ainda não possui locais aprovados para visualizar reservas.'}
-            </p>
+          <div className="bg-white rounded-lg shadow p-6 overflow-auto" style={{ maxHeight: '700px' }}>
+            <h2 className="text-xl font-semibold mb-4">Lista de Reservas</h2>
+            {reservas.length === 0 ? (
+              <p>Nenhuma reserva encontrada.</p>
+            ) : (
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead>
+                  <tr>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Local</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Usuário</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Início</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Fim</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {reservas.map(reserva => (
+                    <tr key={reserva.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-2 whitespace-nowrap">{reserva.local_nome}</td>
+                      <td className="px-4 py-2 whitespace-nowrap">{reserva.nome_usuario || 'Usuário'}</td>
+                      <td className="px-4 py-2 whitespace-nowrap">{reserva.data_reserva}</td>
+                      <td className="px-4 py-2 whitespace-nowrap">{reserva.hora_inicio}</td>
+                      <td className="px-4 py-2 whitespace-nowrap">{reserva.hora_fim}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
-        ) : (
-          <div className="bg-white rounded-lg shadow p-6">
-            <div style={{ height: '700px' }}>
-              <Calendar
-                localizer={localizer}
-                events={eventos}
-                startAccessor="start"
-                endAccessor="end"
-                style={{ height: '100%' }}
-                messages={messages}
-                eventPropGetter={eventStyleGetter}
-                views={['month', 'week', 'day']}
-                view={view}
-                onView={setView}
-                defaultView="week"
-                popup
-                culture="pt-BR"
-                tooltipAccessor={(event: CalendarEvent) =>
-                  `${event.resource.local_nome} - ${
-                    event.resource.nome_usuario || 'Usuário'
-                  }`
-                }
-              />
-            </div>
-          </div>
-        )}
-
-        {reservas.length > 0 && (
-          <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-sm text-blue-800">
-              <strong>Total de reservas:</strong> {reservas.length}
-              {localSelecionado !== 'todos' && (
-                <span>
-                  {' '}
-                  - <strong>Local:</strong>{' '}
-                  {locais.find((l) => l.id === localSelecionado)?.nome}
-                </span>
-              )}
-            </p>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );

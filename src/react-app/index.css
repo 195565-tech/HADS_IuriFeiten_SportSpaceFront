@@ -6,21 +6,23 @@
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
 
-/* Oculta os botões de navegação do calendário: Hoje, Anterior, Próximo (PT e EN) */
-.rbc-toolbar button[title="Hoje"],
+/* Removendo ocultação dos botões de navegação do calendário para permitir controle pleno do usuário */
+/* Se quiser manter algum deles oculto basta descomentar abaixo */
+
+/* .rbc-toolbar button[title="Hoje"],
 .rbc-toolbar button[title="Anterior"],
 .rbc-toolbar button[title="Próximo"],
 .rbc-toolbar button[title="Today"],
 .rbc-toolbar button[title="Back"],
 .rbc-toolbar button[title="Next"] {
   display: none !important;
-}
+} */
 
-/* Oculta a visualização Agenda do calendário caso a classe ou elemento exista residual */
-.rbc-btn-group > button:contains('Agenda'),
+/* Remover ocultação do botão agenda caso queira mantê-lo disponível */
+/* .rbc-btn-group > button:contains('Agenda'),
 .rbc-toolbar button[title="Agenda"] {
   display: none !important;
-}
+} */
 
 /* Ajustes visuais para o calendário */
 .rbc-calendar {
