@@ -47,7 +47,7 @@ export default function Relatorio() {
   const [locais, setLocais] = useState<Local[]>([]);
   const [localSelecionado, setLocalSelecionado] = useState<number | 'todos'>('todos');
   const [reservas, setReservas] = useState<Reserva[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [setLoadingLocal, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [view, setView] = useState<View>('week');
   const { user } = useAuth();
