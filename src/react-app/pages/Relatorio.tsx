@@ -12,10 +12,19 @@ const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales
 
 // Função para combinar data e hora
 function montarDataHora(dataStr: string, horaStr: string): Date {
-  if (!dataStr || !horaStr) return new Date();
-  const [ano, mes, dia] = dataStr.split('-').map(Number);
-  const [hora, minuto, segundo] = horaStr.split(':').map(Number);
-  return new Date(ano, mes - 1, dia, hora, minuto, segundo || 0);
+  if (!dataStr || !horaStr) {
+    console.error('Data ou hora inválida:', dataStr, horaStr);
+    return new Date('invalid');
+  }
+  const [ano, mes, dia] = dataStr.trim().split('-').map(Number);
+  const partes = horaStr.trim().split(':').map(Number);
+  const date = new Date(ano, mes - 1, dia, partes[0], partes[1], partes[2] || 0);
+  
+  if (isNaN(date.getTime())) {
+    console.error('Date inválido criado:', dataStr, horaStr);
+  }
+  
+  return date;
 }
 
 interface Local {
@@ -40,14 +49,14 @@ interface CalendarEvent {
   title: string;
   start: Date;
   end: Date;
-  resource: Reserva;
+  resource: Reserva | {};
 }
 
 export default function Relatorio() {
   const [locais, setLocais] = useState<Local[]>([]);
   const [localSelecionado, setLocalSelecionado] = useState<number | 'todos'>('todos');
   const [reservas, setReservas] = useState<Reserva[]>([]);
-  const [setLoadingLocal, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [view, setView] = useState<View>('week');
   const { user } = useAuth();
@@ -110,14 +119,40 @@ export default function Relatorio() {
     }
   };
 
+  // Evento estático de teste
+  const eventoTeste: CalendarEvent = {
+    id: 999,
+    title: "Teste Manual",
+    start: new Date(2025, 10, 5, 20, 0), // 5 de novembro de 2025, 20h
+    end: new Date(2025, 10, 5, 21, 0),
+    resource: {},
+  };
+
   // Montar eventos para o calendário
-  const eventos: CalendarEvent[] = reservas.map(reserva => ({
+  const eventosReservas: CalendarEvent[] = reservas.map(reserva => ({
     id: reserva.id,
     title: `${reserva.local_nome} - ${reserva.nome_usuario || 'Usuário'}`,
     start: montarDataHora(reserva.data_reserva, reserva.hora_inicio),
     end: montarDataHora(reserva.data_reserva, reserva.hora_fim),
     resource: reserva,
   }));
+
+  // Adiciona o evento de teste ao início do array
+  const eventos = [eventoTeste, ...eventosReservas];
+
+  // LOGS DE DIAGNÓSTICO
+  console.log('Reservas recebidas:', reservas);
+  console.log('Eventos criados:', eventos);
+  eventos.forEach(ev => {
+    console.log(
+      'Evento:', ev.id,
+      'Título:', ev.title,
+      'Start:', ev.start, 
+      'End:', ev.end,
+      'Start válido?', ev.start instanceof Date && !isNaN(ev.start.getTime()),
+      'End válido?', ev.end instanceof Date && !isNaN(ev.end.getTime())
+    );
+  });
 
   const messages = {
     allDay: 'Dia inteiro',
@@ -209,7 +244,7 @@ export default function Relatorio() {
               defaultView="week"
               popup
               culture="pt-BR"
-              tooltipAccessor={event => `${event.resource.local_nome} - ${event.resource.nome_usuario || 'Usuário'}`}
+              tooltipAccessor={event => `${event.title}`}
             />
           </div>
           <div className="bg-white rounded-lg shadow p-6 overflow-auto" style={{ maxHeight: '700px' }}>
