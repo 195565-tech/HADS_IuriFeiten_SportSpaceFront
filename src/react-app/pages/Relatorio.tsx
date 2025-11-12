@@ -1,31 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import Header from '@/react-app/components/Header';
-import { Calendar, dateFnsLocalizer, View } from 'react-big-calendar';
-import { format, parse, startOfWeek, getDay } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
-
-const locales = { 'pt-BR': ptBR };
-const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales });
-
-// Função para combinar data e hora
-function montarDataHora(dataStr: string, horaStr: string): Date {
-  if (!dataStr || !horaStr) {
-    console.error('Data ou hora inválida:', dataStr, horaStr);
-    return new Date('invalid');
-  }
-  const [ano, mes, dia] = dataStr.trim().split('-').map(Number);
-  const partes = horaStr.trim().split(':').map(Number);
-  const date = new Date(ano, mes - 1, dia, partes[0], partes[1], partes[2] || 0);
-  
-  if (isNaN(date.getTime())) {
-    console.error('Date inválido criado:', dataStr, horaStr);
-  }
-  
-  return date;
-}
 
 interface Local {
   id: number;
@@ -44,13 +20,18 @@ interface Reserva {
   nome_usuario?: string;
 }
 
-interface CalendarEvent {
-  id: number;
-  title: string;
-  start: Date;
-  end: Date;
-  resource: Reserva | {};
-}
+type SortConfig = {
+  key: keyof Reserva;
+  direction: 'asc' | 'desc';
+} | null;
+
+type FilterConfig = {
+  local_nome: string;
+  nome_usuario: string;
+  data_reserva: string;
+  hora_inicio: string;
+  hora_fim: string;
+};
 
 export default function Relatorio() {
   const [locais, setLocais] = useState<Local[]>([]);
@@ -58,7 +39,14 @@ export default function Relatorio() {
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [view, setView] = useState<View>('week');
+  const [sortConfig, setSortConfig] = useState<SortConfig>(null);
+  const [filters, setFilters] = useState<FilterConfig>({
+    local_nome: '',
+    nome_usuario: '',
+    data_reserva: '',
+    hora_inicio: '',
+    hora_fim: '',
+  });
   const { user } = useAuth();
 
   useEffect(() => {
@@ -119,66 +107,108 @@ export default function Relatorio() {
     }
   };
 
-  // Evento estático de teste
-  const eventoTeste: CalendarEvent = {
-    id: 999,
-    title: "Teste Manual",
-    start: new Date(2025, 10, 5, 20, 0), // 5 de novembro de 2025, 20h
-    end: new Date(2025, 10, 5, 21, 0),
-    resource: {},
+  // Função de ordenação
+  const handleSort = (key: keyof Reserva) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
   };
 
-  // Montar eventos para o calendário
-  const eventosReservas: CalendarEvent[] = reservas.map(reserva => ({
-    id: reserva.id,
-    title: `${reserva.local_nome} - ${reserva.nome_usuario || 'Usuário'}`,
-    start: montarDataHora(reserva.data_reserva, reserva.hora_inicio),
-    end: montarDataHora(reserva.data_reserva, reserva.hora_fim),
-    resource: reserva,
-  }));
+  // Função de filtro
+  const handleFilterChange = (key: keyof FilterConfig, value: string) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
 
-  // Adiciona o evento de teste ao início do array
-  const eventos = [eventoTeste, ...eventosReservas];
+  // Limpar filtros
+  const clearFilters = () => {
+    setFilters({
+      local_nome: '',
+      nome_usuario: '',
+      data_reserva: '',
+      hora_inicio: '',
+      hora_fim: '',
+    });
+  };
 
-  // LOGS DE DIAGNÓSTICO
-  console.log('Reservas recebidas:', reservas);
-  console.log('Eventos criados:', eventos);
-  eventos.forEach(ev => {
-    console.log(
-      'Evento:', ev.id,
-      'Título:', ev.title,
-      'Start:', ev.start, 
-      'End:', ev.end,
-      'Start válido?', ev.start instanceof Date && !isNaN(ev.start.getTime()),
-      'End válido?', ev.end instanceof Date && !isNaN(ev.end.getTime())
+  // Aplicar filtros e ordenação
+  const filteredAndSortedReservas = useMemo(() => {
+    let filtered = [...reservas];
+
+    // Aplicar filtros
+    Object.keys(filters).forEach((key) => {
+      const filterKey = key as keyof FilterConfig;
+      const filterValue = filters[filterKey].toLowerCase();
+      if (filterValue) {
+        filtered = filtered.filter(reserva => {
+          const value = reserva[filterKey as keyof Reserva];
+          return value?.toString().toLowerCase().includes(filterValue);
+        });
+      }
+    });
+
+    // Aplicar ordenação
+    if (sortConfig) {
+      filtered.sort((a, b) => {
+        const aValue = a[sortConfig.key];
+        const bValue = b[sortConfig.key];
+        
+        if (aValue === null || aValue === undefined) return 1;
+        if (bValue === null || bValue === undefined) return -1;
+        
+        if (aValue < bValue) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+
+    return filtered;
+  }, [reservas, filters, sortConfig]);
+
+  // Exportar para CSV
+  const exportToCSV = () => {
+    const headers = ['ID', 'Local', 'Usuário', 'Data', 'Hora Início', 'Hora Fim'];
+    const csvContent = [
+      headers.join(','),
+      ...filteredAndSortedReservas.map(reserva =>
+        [
+          reserva.id,
+          `"${reserva.local_nome}"`,
+          `"${reserva.nome_usuario || 'Usuário'}"`,
+          reserva.data_reserva,
+          reserva.hora_inicio,
+          reserva.hora_fim,
+        ].join(',')
+      ),
+    ].join('\n');
+
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.download = `relatorio_reservas_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // Ícone de ordenação
+  const SortIcon = ({ columnKey }: { columnKey: keyof Reserva }) => {
+    if (!sortConfig || sortConfig.key !== columnKey) {
+      return <span className="ml-1 text-gray-400">⇅</span>;
+    }
+    return (
+      <span className="ml-1">
+        {sortConfig.direction === 'asc' ? '↑' : '↓'}
+      </span>
     );
-  });
-
-  const messages = {
-    allDay: 'Dia inteiro',
-    previous: 'Anterior',
-    next: 'Próximo',
-    today: 'Hoje',
-    month: 'Mês',
-    week: 'Semana',
-    day: 'Dia',
-    date: 'Data',
-    time: 'Hora',
-    event: 'Reserva',
-    noEventsInRange: 'Não há reservas neste período.',
-    showMore: (total: number) => `+ Ver mais (${total})`,
   };
-
-  const eventStyleGetter = () => ({
-    style: {
-      backgroundColor: '#3b82f6',
-      borderRadius: '5px',
-      opacity: 0.8,
-      color: 'white',
-      border: '0px',
-      display: 'block',
-    },
-  });
 
   if (!user || (user.user_type !== 'owner' && user.user_type !== 'admin')) {
     return (
@@ -187,7 +217,7 @@ export default function Relatorio() {
         <div className="flex items-center justify-center py-20">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Acesso negado</h2>
-            <p className="text-gray-600">Apenas proprietários e administradores podem acessar o dashboard.</p>
+            <p className="text-gray-600">Apenas proprietários e administradores podem acessar o relatório.</p>
           </div>
         </div>
       </div>
@@ -199,82 +229,194 @@ export default function Relatorio() {
       <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard de Reservas</h1>
-          <p className="mt-2 text-gray-600">Visualize as reservas dos seus locais esportivos</p>
+          <h1 className="text-3xl font-bold text-gray-900">Relatório de Reservas</h1>
+          <p className="mt-2 text-gray-600">Visualize e filtre as reservas dos seus locais esportivos</p>
         </div>
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded mb-6">{error}</div>
         )}
 
-        {locais.length > 1 && (
-          <div className="mb-6 bg-white rounded-lg shadow p-4">
-            <label htmlFor="local-filter" className="block text-sm font-medium text-gray-700 mb-2">
-              Filtrar por local:
-            </label>
-            <select
-              id="local-filter"
-              value={localSelecionado}
-              onChange={e => setLocalSelecionado(e.target.value === 'todos' ? 'todos' : Number(e.target.value))}
-              className="block w-full max-w-md px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="todos">Todos os locais</option>
-              {locais.map(local => (
-                <option key={local.id} value={local.id}>
-                  {local.nome}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-white rounded-lg shadow p-6" style={{ height: '700px' }}>
-            <Calendar
-              localizer={localizer}
-              events={eventos}
-              startAccessor="start"
-              endAccessor="end"
-              style={{ height: '100%' }}
-              messages={messages}
-              eventPropGetter={eventStyleGetter}
-              views={['month', 'week', 'day']}
-              view={view}
-              onView={setView}
-              defaultView="week"
-              popup
-              culture="pt-BR"
-              tooltipAccessor={event => `${event.title}`}
-            />
-          </div>
-          <div className="bg-white rounded-lg shadow p-6 overflow-auto" style={{ maxHeight: '700px' }}>
-            <h2 className="text-xl font-semibold mb-4">Lista de Reservas</h2>
-            {reservas.length === 0 ? (
-              <p>Nenhuma reserva encontrada.</p>
-            ) : (
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead>
-                  <tr>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Local</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Usuário</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Início</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Fim</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {reservas.map(reserva => (
-                    <tr key={reserva.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-2 whitespace-nowrap">{reserva.local_nome}</td>
-                      <td className="px-4 py-2 whitespace-nowrap">{reserva.nome_usuario || 'Usuário'}</td>
-                      <td className="px-4 py-2 whitespace-nowrap">{reserva.data_reserva}</td>
-                      <td className="px-4 py-2 whitespace-nowrap">{reserva.hora_inicio}</td>
-                      <td className="px-4 py-2 whitespace-nowrap">{reserva.hora_fim}</td>
-                    </tr>
+        {/* Barra de controles */}
+        <div className="mb-6 bg-white rounded-lg shadow p-4 space-y-4">
+          <div className="flex flex-wrap gap-4 items-end">
+            {locais.length > 1 && (
+              <div className="flex-1 min-w-[200px]">
+                <label htmlFor="local-filter" className="block text-sm font-medium text-gray-700 mb-2">
+                  Filtrar por local:
+                </label>
+                <select
+                  id="local-filter"
+                  value={localSelecionado}
+                  onChange={e => setLocalSelecionado(e.target.value === 'todos' ? 'todos' : Number(e.target.value))}
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="todos">Todos os locais</option>
+                  {locais.map(local => (
+                    <option key={local.id} value={local.id}>
+                      {local.nome}
+                    </option>
                   ))}
-                </tbody>
-              </table>
+                </select>
+              </div>
             )}
+
+            <div className="flex gap-2">
+              <button
+                onClick={clearFilters}
+                className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+              >
+                Limpar Filtros
+              </button>
+              <button
+                onClick={exportToCSV}
+                disabled={filteredAndSortedReservas.length === 0}
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                Exportar CSV
+              </button>
+            </div>
+          </div>
+
+          {/* Estatísticas */}
+          <div className="flex gap-6 text-sm text-gray-600">
+            <div>
+              <span className="font-semibold">Total de reservas:</span> {reservas.length}
+            </div>
+            <div>
+              <span className="font-semibold">Registros filtrados:</span> {filteredAndSortedReservas.length}
+            </div>
+          </div>
+        </div>
+
+        {/* Tabela com filtros */}
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <div className="flex items-center cursor-pointer" onClick={() => handleSort('id')}>
+                      ID <SortIcon columnKey="id" />
+                    </div>
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <div className="flex items-center cursor-pointer" onClick={() => handleSort('local_nome')}>
+                      Local <SortIcon columnKey="local_nome" />
+                    </div>
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <div className="flex items-center cursor-pointer" onClick={() => handleSort('nome_usuario')}>
+                      Usuário <SortIcon columnKey="nome_usuario" />
+                    </div>
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <div className="flex items-center cursor-pointer" onClick={() => handleSort('data_reserva')}>
+                      Data <SortIcon columnKey="data_reserva" />
+                    </div>
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <div className="flex items-center cursor-pointer" onClick={() => handleSort('hora_inicio')}>
+                      Início <SortIcon columnKey="hora_inicio" />
+                    </div>
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <div className="flex items-center cursor-pointer" onClick={() => handleSort('hora_fim')}>
+                      Fim <SortIcon columnKey="hora_fim" />
+                    </div>
+                  </th>
+                </tr>
+                {/* Linha de filtros */}
+                <tr className="bg-gray-100">
+                  <th className="px-6 py-2">
+                    {/* ID não precisa de filtro */}
+                  </th>
+                  <th className="px-6 py-2">
+                    <input
+                      type="text"
+                      placeholder="Filtrar..."
+                      value={filters.local_nome}
+                      onChange={e => handleFilterChange('local_nome', e.target.value)}
+                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </th>
+                  <th className="px-6 py-2">
+                    <input
+                      type="text"
+                      placeholder="Filtrar..."
+                      value={filters.nome_usuario}
+                      onChange={e => handleFilterChange('nome_usuario', e.target.value)}
+                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </th>
+                  <th className="px-6 py-2">
+                    <input
+                      type="text"
+                      placeholder="AAAA-MM-DD"
+                      value={filters.data_reserva}
+                      onChange={e => handleFilterChange('data_reserva', e.target.value)}
+                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </th>
+                  <th className="px-6 py-2">
+                    <input
+                      type="text"
+                      placeholder="HH:MM"
+                      value={filters.hora_inicio}
+                      onChange={e => handleFilterChange('hora_inicio', e.target.value)}
+                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </th>
+                  <th className="px-6 py-2">
+                    <input
+                      type="text"
+                      placeholder="HH:MM"
+                      value={filters.hora_fim}
+                      onChange={e => handleFilterChange('hora_fim', e.target.value)}
+                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {loading ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                      Carregando...
+                    </td>
+                  </tr>
+                ) : filteredAndSortedReservas.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                      Nenhuma reserva encontrada.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredAndSortedReservas.map(reserva => (
+                    <tr key={reserva.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {reserva.id}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {reserva.local_nome}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {reserva.nome_usuario || 'Usuário'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {reserva.data_reserva}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {reserva.hora_inicio}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {reserva.hora_fim}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
