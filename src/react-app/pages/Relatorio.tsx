@@ -104,6 +104,20 @@ export default function Relatorio() {
     }
   };
 
+  // Formatar data para DD/MM/YYYY
+  const formatarData = (dataStr: string): string => {
+    if (!dataStr) return '';
+    
+    // Se a data já estiver no formato esperado (YYYY-MM-DD)
+    const partes = dataStr.split('T')[0].split('-');
+    if (partes.length === 3) {
+      const [ano, mes, dia] = partes;
+      return `${dia}/${mes}/${ano}`;
+    }
+    
+    return dataStr;
+  };
+
   // Função de ordenação
   const handleSort = (key: keyof Reserva) => {
     let direction: 'asc' | 'desc' = 'asc';
@@ -139,7 +153,13 @@ export default function Relatorio() {
       const filterValue = filters[filterKey].toLowerCase();
       if (filterValue) {
         filtered = filtered.filter(reserva => {
-          const value = reserva[filterKey as keyof Reserva];
+          let value = reserva[filterKey as keyof Reserva];
+          
+          // Para data, formatar antes de filtrar
+          if (filterKey === 'data_reserva' && value) {
+            value = formatarData(value.toString()) as any;
+          }
+          
           return value?.toString().toLowerCase().includes(filterValue);
         });
       }
@@ -169,15 +189,14 @@ export default function Relatorio() {
 
   // Exportar para CSV
   const exportToCSV = () => {
-    const headers = ['ID', 'Local', 'Usuário', 'Data', 'Hora Início', 'Hora Fim'];
+    const headers = ['Local', 'Usuário', 'Data', 'Hora Início', 'Hora Fim'];
     const csvContent = [
       headers.join(','),
       ...filteredAndSortedReservas.map(reserva =>
         [
-          reserva.id,
           `"${reserva.local_nome}"`,
-          `"${reserva.nome_usuario || 'Usuário'}"`,
-          reserva.data_reserva,
+          `"${reserva.nome_usuario || 'Usuário não identificado'}"`,
+          formatarData(reserva.data_reserva),
           reserva.hora_inicio,
           reserva.hora_fim,
         ].join(',')
@@ -260,11 +279,6 @@ export default function Relatorio() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    <div className="flex items-center cursor-pointer" onClick={() => handleSort('id')}>
-                      ID <SortIcon columnKey="id" />
-                    </div>
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('local_nome')}>
                       Local <SortIcon columnKey="local_nome" />
                     </div>
@@ -293,9 +307,6 @@ export default function Relatorio() {
                 {/* Linha de filtros */}
                 <tr className="bg-gray-100">
                   <th className="px-6 py-2">
-                    {/* ID não precisa de filtro */}
-                  </th>
-                  <th className="px-6 py-2">
                     <input
                       type="text"
                       placeholder="Filtrar..."
@@ -316,7 +327,7 @@ export default function Relatorio() {
                   <th className="px-6 py-2">
                     <input
                       type="text"
-                      placeholder="AAAA-MM-DD"
+                      placeholder="DD/MM/AAAA"
                       value={filters.data_reserva}
                       onChange={e => handleFilterChange('data_reserva', e.target.value)}
                       className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -345,13 +356,13 @@ export default function Relatorio() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                    <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
                       Carregando...
                     </td>
                   </tr>
                 ) : filteredAndSortedReservas.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                    <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
                       Nenhuma reserva encontrada.
                     </td>
                   </tr>
@@ -359,16 +370,13 @@ export default function Relatorio() {
                   filteredAndSortedReservas.map(reserva => (
                     <tr key={reserva.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {reserva.id}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {reserva.local_nome}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {reserva.nome_usuario || 'Usuário'}
+                        {reserva.nome_usuario || 'Usuário não identificado'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {reserva.data_reserva}
+                        {formatarData(reserva.data_reserva)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {reserva.hora_inicio}
