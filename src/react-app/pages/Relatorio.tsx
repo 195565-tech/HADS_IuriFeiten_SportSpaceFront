@@ -35,7 +35,6 @@ type FilterConfig = {
 
 export default function Relatorio() {
   const [locais, setLocais] = useState<Local[]>([]);
-  const [localSelecionado, setLocalSelecionado] = useState<number | 'todos'>('todos');
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -59,7 +58,7 @@ export default function Relatorio() {
 
   useEffect(() => {
     if (locais.length > 0) fetchReservas();
-  }, [localSelecionado, locais]);
+  }, [locais]);
 
   const fetchLocais = async () => {
     try {
@@ -89,9 +88,7 @@ export default function Relatorio() {
       setLoading(true);
       let url = '/api/reservas';
 
-      if (localSelecionado !== 'todos') {
-        url += `?local_id=${localSelecionado}`;
-      } else if (user?.user_type === 'owner') {
+      if (user?.user_type === 'owner') {
         const locaisIds = locais.map(l => l.id).join(',');
         if (locaisIds) url += `?locais_ids=${locaisIds}`;
       }
@@ -238,54 +235,21 @@ export default function Relatorio() {
         )}
 
         {/* Barra de controles */}
-        <div className="mb-6 bg-white rounded-lg shadow p-4 space-y-4">
-          <div className="flex flex-wrap gap-4 items-end">
-            {locais.length > 1 && (
-              <div className="flex-1 min-w-[200px]">
-                <label htmlFor="local-filter" className="block text-sm font-medium text-gray-700 mb-2">
-                  Filtrar por local:
-                </label>
-                <select
-                  id="local-filter"
-                  value={localSelecionado}
-                  onChange={e => setLocalSelecionado(e.target.value === 'todos' ? 'todos' : Number(e.target.value))}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="todos">Todos os locais</option>
-                  {locais.map(local => (
-                    <option key={local.id} value={local.id}>
-                      {local.nome}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            <div className="flex gap-2">
-              <button
-                onClick={clearFilters}
-                className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
-              >
-                Limpar Filtros
-              </button>
-              <button
-                onClick={exportToCSV}
-                disabled={filteredAndSortedReservas.length === 0}
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-              >
-                Exportar CSV
-              </button>
-            </div>
-          </div>
-
-          {/* Estatísticas */}
-          <div className="flex gap-6 text-sm text-gray-600">
-            <div>
-              <span className="font-semibold">Total de reservas:</span> {reservas.length}
-            </div>
-            <div>
-              <span className="font-semibold">Registros filtrados:</span> {filteredAndSortedReservas.length}
-            </div>
+        <div className="mb-6 bg-white rounded-lg shadow p-4">
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={clearFilters}
+              className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+            >
+              Limpar Filtros
+            </button>
+            <button
+              onClick={exportToCSV}
+              disabled={filteredAndSortedReservas.length === 0}
+              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+            >
+              Exportar CSV
+            </button>
           </div>
         </div>
 
