@@ -1,12 +1,14 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = 'http://localhost:3000';
 
 const api = axios.create({
   baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
-// Interceptor para adicionar token de autorização se necessário
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -15,14 +17,11 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Interceptor para lidar com respostas de erro
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Não redirecionar automaticamente para evitar loops
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
-      // Apenas limpar o token, não redirecionar
     }
     return Promise.reject(error);
   }

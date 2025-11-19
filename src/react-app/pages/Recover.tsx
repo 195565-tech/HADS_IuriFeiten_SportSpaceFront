@@ -15,7 +15,7 @@ export default function Recover() {
     setLoading(true);
 
     try {
-      const response = await api.post('/api/recover', { email });
+      const response = await api.post('/api/auth/forgot-password', { email });
       setMessage(response.data.message);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Erro ao enviar email de recuperação');

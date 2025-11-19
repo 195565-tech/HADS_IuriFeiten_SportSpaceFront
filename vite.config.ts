@@ -9,4 +9,13 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src'),  // aponta '@' para a pasta src
     },
   },
+  server: {
+    port: 5173,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      }
+    }
+  }
 });
