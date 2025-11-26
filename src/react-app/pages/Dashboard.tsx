@@ -5,7 +5,6 @@ import { Plus, Edit, Trash2, Eye, MapPin, Calendar, Clock, X } from 'lucide-reac
 import Header from '@/react-app/components/Header';
 import { Local, Reserva } from '@/shared/types';
 import api from '@/services/api';
-const apiUrl = import.meta.env.VITE_API_URL;
 
 // Garantindo que id de Reserva nunca seja undefined
 interface ReservaComId extends Reserva {
@@ -31,15 +30,13 @@ export default function Dashboard() {
   }, [user, isAdmin]);
 
   const fetchMeusLocais = async () => {
-   
     try {
       const response = await api.get('/api/locais');
       if (response) {
         const meusLocais = response.data.filter((local: Local) => 
-        local.user_id === user?.user_id
-      );
-      setLocais(meusLocais);
-
+          local.user_id === user?.user_id
+        );
+        setLocais(meusLocais);
       }
     } catch (error) {
       console.error('Erro ao buscar locais:', error);
@@ -50,13 +47,12 @@ export default function Dashboard() {
 
   const fetchMinhasReservas = async () => {
     try {
-      const response = await fetch(`${apiUrl}/api/minhas-reservas`);
-      if (response.ok) {
-        const data: Reserva[] = await response.json();
-        // Filtrando apenas reservas que possuem id definido
-        const reservasComId = data.filter((r): r is ReservaComId => r.id !== undefined);
-        setReservas(reservasComId);
-      }
+      // ✅ CORRIGIDO: Usando rota /api/reservas com autenticação via api service
+      const response = await api.get('/api/reservas');
+      const data: Reserva[] = response.data;
+      // Filtrando apenas reservas que possuem id definido
+      const reservasComId = data.filter((r): r is ReservaComId => r.id !== undefined);
+      setReservas(reservasComId);
     } catch (error) {
       console.error('Erro ao buscar reservas:', error);
     } finally {
@@ -68,15 +64,9 @@ export default function Dashboard() {
     if (!confirm('Tem certeza que deseja cancelar esta reserva?')) return;
 
     try {
-      const response = await fetch(`${apiUrl}/api/reservas/${id}/cancelar`, {
-        method: 'PUT',
-      });
-
-      if (response.ok) {
-        setReservas(reservas.map(r => r.id === id ? { ...r, status: 'cancelada' } : r));
-      } else {
-        alert('Erro ao cancelar reserva');
-      }
+      // ✅ CORRIGIDO: Usando api service com autenticação
+      await api.delete(`/api/reservas/${id}`);
+      setReservas(reservas.map(r => r.id === id ? { ...r, status: 'cancelada' } : r));
     } catch (error) {
       console.error('Erro ao cancelar reserva:', error);
       alert('Erro ao cancelar reserva');
@@ -87,15 +77,9 @@ export default function Dashboard() {
     if (!confirm('Tem certeza que deseja excluir este local?')) return;
 
     try {
-      const response = await fetch(`${apiUrl}/api/locais/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        setLocais(locais.filter(local => local.id !== id));
-      } else {
-        alert('Erro ao excluir local');
-      }
+      // ✅ CORRIGIDO: Usando api service com autenticação
+      await api.delete(`/api/locais/${id}`);
+      setLocais(locais.filter(local => local.id !== id));
     } catch (error) {
       console.error('Erro ao excluir local:', error);
       alert('Erro ao excluir local');
