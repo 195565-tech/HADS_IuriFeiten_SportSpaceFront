@@ -6,7 +6,6 @@ import Header from '@/react-app/components/Header';
 interface Local {
   id: number;
   nome: string;
-  user_id?: string;
 }
 
 interface Reserva {
@@ -50,26 +49,29 @@ export default function Relatorio() {
 
   useEffect(() => {
     if (user && (user.user_type === 'owner' || user.user_type === 'admin')) {
-      fetchLocais();
+      if (user.user_type === 'owner') {
+        // Owner precisa buscar seus locais primeiro
+        fetchLocais();
+      } else {
+        // Admin busca direto as reservas
+        fetchReservas();
+      }
     } else if (user) {
       setLoading(false);
     }
   }, [user]);
 
   useEffect(() => {
-    if (locais.length > 0) fetchReservas();
+    // Quando locais carregar (para owner), buscar reservas
+    if (user?.user_type === 'owner' && locais.length > 0) {
+      fetchReservas();
+    }
   }, [locais]);
 
   const fetchLocais = async () => {
     try {
       setLoading(true);
-      let response;
-
-      if (user?.user_type === 'admin') {
-        response = await api.get('/api/locais');
-      } else {
-        response = await api.get('/api/locais/meus');
-      }
+      const response = await api.get('/api/locais/meus');
       const locaisAprovados = response.data.filter(
         (local: any) => local.status_aprovacao === 'aprovado'
       );
@@ -88,11 +90,19 @@ export default function Relatorio() {
       setLoading(true);
       let url = '/api/reservas';
 
-      // ✅ CORREÇÃO: Incluir locais_ids para admin também
-      if (user?.user_type === 'owner' || user?.user_type === 'admin') {
+      // ✅ Owner: filtrar por seus locais
+      if (user?.user_type === 'owner') {
         const locaisIds = locais.map(l => l.id).join(',');
-        if (locaisIds) url += `?locais_ids=${locaisIds}`;
+        if (locaisIds) {
+          url += `?locais_ids=${locaisIds}`;
+        } else {
+          // Se não tem locais, não tem reservas
+          setReservas([]);
+          setLoading(false);
+          return;
+        }
       }
+      // ✅ Admin: busca todas as reservas (sem filtro)
 
       const response = await api.get(url);
       setReservas(response.data);
@@ -245,7 +255,11 @@ export default function Relatorio() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Relatório de Reservas</h1>
-          <p className="mt-2 text-gray-600">Visualize e filtre as reservas dos seus locais esportivos</p>
+          <p className="mt-2 text-gray-600">
+            {user.user_type === 'admin' 
+              ? 'Visualize e filtre todas as reservas do sistema' 
+              : 'Visualize e filtre as reservas dos seus locais esportivos'}
+          </p>
         </div>
 
         {error && (

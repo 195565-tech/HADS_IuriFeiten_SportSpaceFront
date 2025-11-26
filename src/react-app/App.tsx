@@ -6,7 +6,7 @@ import HomePage from "@/react-app/pages/Home";
 import LoginPage from "@/react-app/pages/Login";
 import RegisterPage from "@/react-app/pages/Register";
 import RecoverPage from "@/react-app/pages/Recover";
-import ResetPasswordPage from "@/react-app/pages/ResetPassword"; // ✅ ADICIONAR ESTA LINHA
+import ResetPasswordPage from "@/react-app/pages/ResetPassword";
 import DashboardPage from "@/react-app/pages/Dashboard";
 import CreateLocalPage from "@/react-app/pages/CreateLocal";
 import EditLocalPage from "@/react-app/pages/EditLocal";
