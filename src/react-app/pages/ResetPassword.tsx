@@ -1,6 +1,6 @@
-// pages/ResetPassword.tsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import api from '@/services/api';
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
@@ -22,21 +22,11 @@ export default function ResetPassword() {
   }, [searchParams]);
 
   const validatePassword = (password: string): string | null => {
-    if (password.length < 8) {
-      return 'A senha deve ter no mínimo 8 caracteres';
-    }
-    if (!/[A-Z]/.test(password)) {
-      return 'A senha deve conter pelo menos uma letra maiúscula';
-    }
-    if (!/[a-z]/.test(password)) {
-      return 'A senha deve conter pelo menos uma letra minúscula';
-    }
-    if (!/[0-9]/.test(password)) {
-      return 'A senha deve conter pelo menos um número';
-    }
-    if (!/[^A-Za-z0-9]/.test(password)) {
-      return 'A senha deve conter pelo menos um caractere especial';
-    }
+    if (password.length < 8) return 'A senha deve ter no mínimo 8 caracteres';
+    if (!/[A-Z]/.test(password)) return 'A senha deve conter pelo menos uma letra maiúscula';
+    if (!/[a-z]/.test(password)) return 'A senha deve conter pelo menos uma letra minúscula';
+    if (!/[0-9]/.test(password)) return 'A senha deve conter pelo menos um número';
+    if (!/[^A-Za-z0-9]/.test(password)) return 'A senha deve conter pelo menos um caractere especial';
     return null;
   };
 
@@ -45,7 +35,6 @@ export default function ResetPassword() {
     setError('');
     setSuccess('');
 
-    // Validações
     const passwordError = validatePassword(newPassword);
     if (passwordError) {
       setError(passwordError);
@@ -60,16 +49,13 @@ export default function ResetPassword() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/reset-password', { // ✅ CORRIGIDO: removido /auth
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, newPassword }),
+      const response = await api.post('/api/reset-password', {
+        token,
+        newPassword,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Erro ao redefinir senha');
+      if (!response.data || response.status !== 200) {
+        throw new Error(response.data?.error || 'Erro ao redefinir senha');
       }
 
       setSuccess('Senha redefinida com sucesso! Redirecionando...');
@@ -77,7 +63,11 @@ export default function ResetPassword() {
         navigate('/login');
       }, 2000);
     } catch (err: any) {
-      setError(err.message || 'Erro ao redefinir senha');
+      const message =
+        err.response?.data?.error ||
+        err.message ||
+        'Erro ao redefinir senha';
+      setError(message);
     } finally {
       setLoading(false);
     }
