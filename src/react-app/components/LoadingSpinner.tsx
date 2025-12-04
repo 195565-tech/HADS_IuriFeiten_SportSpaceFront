@@ -1,4 +1,4 @@
-
+//define um componente simples de carregamento que ocupa a tela inteira enquanto algum conteúdo ou dados ainda estão sendo carregados
 export default function LoadingSpinner() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">

@@ -1,3 +1,4 @@
+//edição de local esportivo: ele carrega os dados do local selecionado, preenche o formulário com as informações atuais e permite que o dono altere texto, preço, horário e fotos
 import { useState, useEffect } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, UploadCloud, X } from 'lucide-react';
@@ -52,7 +53,6 @@ export default function EditLocalPage() {
     telefone: ''
   });
 
-  // Buscar local existente
   useEffect(() => {
     if (!id) return;
     const fetchLocal = async () => {
@@ -123,18 +123,15 @@ export default function EditLocalPage() {
       dataToSubmit.append('disponibilidade', formData.disponibilidade);
       dataToSubmit.append('telefone', formData.telefone);
 
-      // Correção: conversão segura de valor_hora
       if (formData.valor_hora != null && !isNaN(formData.valor_hora)) {
         dataToSubmit.append('valorHora', String(formData.valor_hora));
       }
 
-      // URLs antigas (mantidas)
       const existingUrls = fotosArquivos
         .filter(f => !f.file)
         .map(f => f.preview);
       dataToSubmit.append('fotosExistentes', JSON.stringify(existingUrls));
 
-      // Novos arquivos
       fotosArquivos.forEach(foto => {
         if (foto.file) {
           dataToSubmit.append('fotos', foto.file);
@@ -288,7 +285,7 @@ export default function EditLocalPage() {
             </div>
           </div>
 
-          {/* Upload de fotos */}
+          {}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">Fotos</label>
             <div className="space-y-3">

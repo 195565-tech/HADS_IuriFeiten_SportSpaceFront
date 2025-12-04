@@ -1,3 +1,4 @@
+//página de relatório de reservas
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
@@ -50,10 +51,8 @@ export default function Relatorio() {
   useEffect(() => {
     if (user && (user.user_type === 'owner' || user.user_type === 'admin')) {
       if (user.user_type === 'owner') {
-        // Owner precisa buscar seus locais primeiro
         fetchLocais();
       } else {
-        // Admin busca direto as reservas
         fetchReservas();
       }
     } else if (user) {
@@ -62,7 +61,6 @@ export default function Relatorio() {
   }, [user]);
 
   useEffect(() => {
-    // Quando locais carregar (para owner), buscar reservas
     if (user?.user_type === 'owner' && locais.length > 0) {
       fetchReservas();
     }
@@ -90,19 +88,16 @@ export default function Relatorio() {
       setLoading(true);
       let url = '/api/reservas';
 
-      // ✅ Owner: filtrar por seus locais
       if (user?.user_type === 'owner') {
         const locaisIds = locais.map(l => l.id).join(',');
         if (locaisIds) {
           url += `?locais_ids=${locaisIds}`;
         } else {
-          // Se não tem locais, não tem reservas
           setReservas([]);
           setLoading(false);
           return;
         }
       }
-      // ✅ Admin: busca todas as reservas (sem filtro)
 
       const response = await api.get(url);
       setReservas(response.data);
@@ -115,7 +110,6 @@ export default function Relatorio() {
     }
   };
 
-  // Formatar data para DD/MM/YYYY
   const formatarData = (dataStr: string): string => {
     if (!dataStr) return '';
     
@@ -128,7 +122,6 @@ export default function Relatorio() {
     return dataStr;
   };
 
-  // Função de ordenação
   const handleSort = (key: keyof Reserva) => {
     let direction: 'asc' | 'desc' = 'asc';
     if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
@@ -137,12 +130,10 @@ export default function Relatorio() {
     setSortConfig({ key, direction });
   };
 
-  // Função de filtro
   const handleFilterChange = (key: keyof FilterConfig, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
-  // Limpar filtros
   const clearFilters = () => {
     setFilters({
       local_nome: '',
@@ -153,11 +144,9 @@ export default function Relatorio() {
     });
   };
 
-  // Aplicar filtros e ordenação
   const filteredAndSortedReservas = useMemo(() => {
     let filtered = [...reservas];
 
-    // Aplicar filtros
     Object.keys(filters).forEach((key) => {
       const filterKey = key as keyof FilterConfig;
       const filterValue = filters[filterKey].toLowerCase();
@@ -174,7 +163,6 @@ export default function Relatorio() {
       }
     });
 
-    // Aplicar ordenação
     if (sortConfig) {
       filtered.sort((a, b) => {
         const aValue = a[sortConfig.key];
@@ -196,7 +184,6 @@ export default function Relatorio() {
     return filtered;
   }, [reservas, filters, sortConfig]);
 
-  // Exportar para CSV
   const exportToCSV = () => {
     const headers = ['Local', 'Usuário', 'Data', 'Hora Início', 'Hora Fim'];
     const csvContent = [
@@ -223,7 +210,6 @@ export default function Relatorio() {
     URL.revokeObjectURL(url);
   };
 
-  // Ícone de ordenação
   const SortIcon = ({ columnKey }: { columnKey: keyof Reserva }) => {
     if (!sortConfig || sortConfig.key !== columnKey) {
       return <span className="ml-1 text-gray-400">⇅</span>;
@@ -266,7 +252,7 @@ export default function Relatorio() {
           <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded mb-6">{error}</div>
         )}
 
-        {/* Barra de controles */}
+        {}
         <div className="mb-6 bg-white rounded-lg shadow p-4">
           <div className="flex justify-end gap-2">
             <button
@@ -285,7 +271,7 @@ export default function Relatorio() {
           </div>
         </div>
 
-        {/* Tabela com filtros */}
+        {}
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -317,7 +303,7 @@ export default function Relatorio() {
                     </div>
                   </th>
                 </tr>
-                {/* Linha de filtros */}
+                {}
                 <tr className="bg-gray-100">
                   <th className="px-6 py-2">
                     <input

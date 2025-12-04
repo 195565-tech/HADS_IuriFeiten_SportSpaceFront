@@ -1,3 +1,4 @@
+//página de recuperação de senha, onde o usuário informa o e‑mail para receber instruções de redefinição. Ele envia esse e‑mail para o backend pela rota /api/forgot-password
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
@@ -15,7 +16,7 @@ export default function Recover() {
     setLoading(true);
 
     try {
-      const response = await api.post('/api/forgot-password', { email }); // ✅ CORRIGIDO: removido /auth
+      const response = await api.post('/api/forgot-password', { email });
       setMessage(response.data.message);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Erro ao enviar email de recuperação');

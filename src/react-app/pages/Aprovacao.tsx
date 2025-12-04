@@ -1,3 +1,4 @@
+//Retorna para o usuário adm locais com o staus pendente, e poder aprovar ou não
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';

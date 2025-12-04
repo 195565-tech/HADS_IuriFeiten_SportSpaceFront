@@ -1,3 +1,4 @@
+//Exibe os locais em formato de cartão, e direciona usuários com link para o local
 import { Link } from 'react-router-dom';
 import { MapPin, DollarSign, Calendar } from 'lucide-react';
 import { Local } from '@/shared/types';

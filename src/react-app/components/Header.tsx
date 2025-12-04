@@ -1,3 +1,5 @@
+//define o cabeçalho principal da aplicação, exibindo o nome “SportSpace” e o menu de navegação no topo do site. 
+// Ele usa o usuário do contexto de autenticação para decidir quais links mostrar
 import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import NotificationDropdown from "./NotificationDropdown";
@@ -16,7 +18,7 @@ export default function Header() {
           <nav className="flex items-center space-x-4">
             {user ? (
               <>
-                {/* Só mostra "Minhas Reservas" se NÃO for owner */}
+                {}
                 {user?.user_type !== "owner" && (
                   <Link
                     to="/minhas-reservas"
@@ -26,7 +28,7 @@ export default function Header() {
                   </Link>
                 )}
 
-                {/* Mostra "Meus Locais" apenas para admin ou owner */}
+                {}
                 {(user?.user_type === "admin" || user?.user_type === "owner") && (
                   <Link
                     to="/admin/locais"
@@ -36,7 +38,7 @@ export default function Header() {
                   </Link>
                 )}
 
-                {/* ✅ ALTERADO: Dashboard SEM ícone, apenas texto */}
+                {}
                 {(user?.user_type === "admin" || user?.user_type === "owner") && (
                   <Link
                     to="/relatorio"
@@ -46,7 +48,7 @@ export default function Header() {
                   </Link>
                 )}
 
-                {/* Link de Aprovações apenas para admin */}
+                {}
                 {user?.user_type === "admin" && (
                   <Link
                     to="/aprovacao"

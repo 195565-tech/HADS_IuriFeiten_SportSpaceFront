@@ -1,3 +1,4 @@
+//página onde o usuário realiza a reserva do local
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
@@ -75,7 +76,6 @@ export default function ReservarLocalPage() {
     }
   };
 
-  // Calcular valor estimado
   const calcularValorEstimado = () => {
     if (!local?.valor_hora || !formData.hora_inicio || !formData.hora_fim) {
       return null;
@@ -158,7 +158,7 @@ export default function ReservarLocalPage() {
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Data da Reserva */}
+            {}
             <div>
               <label htmlFor="data_reserva" className="block text-sm font-medium text-gray-700 mb-2">
                 Data da Reserva *
@@ -176,7 +176,7 @@ export default function ReservarLocalPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Hora de Início */}
+              {}
               <div>
                 <label htmlFor="hora_inicio" className="block text-sm font-medium text-gray-700 mb-2">
                   Hora de Início *
@@ -192,7 +192,7 @@ export default function ReservarLocalPage() {
                 />
               </div>
 
-              {/* Hora de Fim */}
+              {}
               <div>
                 <label htmlFor="hora_fim" className="block text-sm font-medium text-gray-700 mb-2">
                   Hora de Fim *
@@ -209,7 +209,7 @@ export default function ReservarLocalPage() {
               </div>
             </div>
 
-            {/* Observações */}
+            {}
             <div>
               <label htmlFor="observacoes" className="block text-sm font-medium text-gray-700 mb-2">
                 Observações
@@ -225,7 +225,7 @@ export default function ReservarLocalPage() {
               />
             </div>
 
-            {/* Resumo da Reserva */}
+            {}
             {local && (
               <div className="bg-gray-50 rounded-lg p-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Resumo da Reserva</h3>
@@ -271,7 +271,7 @@ export default function ReservarLocalPage() {
               </div>
             )}
 
-            {/* Botões */}
+            {}
             <div className="flex space-x-4 pt-6">
               <button
                 type="button"

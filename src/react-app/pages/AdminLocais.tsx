@@ -1,3 +1,5 @@
+//implementa a página Meus Locais do painel do dono/admin,
+//onde o usuário autenticado vê todos os locais esportivos que cadastrou
 import  { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -32,9 +34,7 @@ export default function AdminLocais() {
 
   const fetchLocais = async () => {
     try {
-      // MODIFICADO: Chamada para endpoint específico que retorna locais do usuário
       const response = await api.get('/api/locais/meus');
-      // Não é mais necessário filtrar manualmente, o backend já faz isso
       setLocais(response.data);
     } catch (err: any) {
       setError('Erro ao carregar locais');
@@ -54,7 +54,6 @@ export default function AdminLocais() {
     }
   };
 
-  // Função auxiliar para formatar valor
   const formatarValor = (valor: any): string => {
     const num = typeof valor === 'string' ? parseFloat(valor) : valor;
     return !isNaN(num) && num != null ? num.toFixed(2) : '0.00';
@@ -131,7 +130,7 @@ export default function AdminLocais() {
                     <h3 className="text-lg font-medium text-gray-900">
                       {local.nome}
                     </h3>
-                    {/* Badge de status */}
+                    {}
                     {local.status_aprovacao === 'pendente' && (
                       <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 mt-2">
                         🕐 Aguardando aprovação

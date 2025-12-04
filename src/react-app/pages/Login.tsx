@@ -1,3 +1,4 @@
+//página de login tradicional da aplicação, com um formulário que coleta e‑mail e senha do usuário
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';

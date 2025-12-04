@@ -1,4 +1,4 @@
-// components/AuthModal.tsx
+//define componente de modal de autenticação que exibe o formulario de login ou cadastro
 import React, { useState } from "react";
 import { useAuth } from "../provider/AuthProvider";
 
@@ -8,8 +8,8 @@ interface AuthModalProps {
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
-  const { login, register } = useAuth(); // Importa register
-  const [isRegisterMode, setIsRegisterMode] = useState(false); // 🚀 NOVO: Estado de modo
+  const { login, register } = useAuth(); 
+  const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -22,11 +22,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
 
     try {
       if (isRegisterMode) {
-        // Modo Cadastro
         await register(email, password);
         alert("Cadastro realizado com sucesso! Você já está logado.");
       } else {
-        // Modo Login
         await login(email, password);
       }
       onClose();
@@ -83,14 +81,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
           </button>
         </form>
         
-        {/* Alternar modo */}
+        {}
         <div className="mt-4 pt-4 border-t border-gray-200 text-center">
             <button
                 type="button"
                 className="text-sm text-blue-600 hover:underline"
                 onClick={() => {
                     setIsRegisterMode(!isRegisterMode);
-                    setError(""); // Limpa o erro ao trocar
+                    setError("");
                 }}
             >
                 {isRegisterMode ? "Já tem conta? Faça login" : "Não tem conta? Crie uma"}

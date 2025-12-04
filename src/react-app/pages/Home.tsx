@@ -1,3 +1,4 @@
+//página inicial da aplicação, responsável por listar todos os locais esportivos cadastrados e permitir que o usuário pesquise por nome/endereço e filtre por esporte
 import { useState, useEffect } from 'react';
 import { Search, Filter, MapPin } from 'lucide-react';
 import Header from '@/react-app/components/Header';
@@ -39,7 +40,7 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       
-      {/* Hero Section */}
+      {}
       <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
@@ -54,7 +55,7 @@ export default function Home() {
               Reserve facilmente e pratique seu esporte favorito.
             </p>
             
-            {/* Search Bar */}
+            {}
             <div className="max-w-2xl mx-auto">
               <div className="bg-white rounded-xl shadow-lg p-2 flex flex-col sm:flex-row gap-2">
                 <div className="flex-1 relative">
@@ -86,7 +87,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Main Content */}
+      {}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {loading ? (
           <div className="flex justify-center items-center py-20">

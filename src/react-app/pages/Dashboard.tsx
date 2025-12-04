@@ -1,3 +1,4 @@
+//verifica o tipo de usuário e, se for admin/owner, mostra os locais que ele cadastrou 
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Navigate, Link } from 'react-router-dom';
@@ -6,7 +7,7 @@ import Header from '@/react-app/components/Header';
 import { Local, Reserva } from '@/shared/types';
 import api from '@/services/api';
 
-// Garantindo que id de Reserva nunca seja undefined
+
 interface ReservaComId extends Reserva {
   id: number;
 }
@@ -47,10 +48,8 @@ export default function Dashboard() {
 
   const fetchMinhasReservas = async () => {
     try {
-      // ✅ CORRIGIDO: Usando rota /api/reservas com autenticação via api service
       const response = await api.get('/api/reservas');
       const data: Reserva[] = response.data;
-      // Filtrando apenas reservas que possuem id definido
       const reservasComId = data.filter((r): r is ReservaComId => r.id !== undefined);
       setReservas(reservasComId);
     } catch (error) {
@@ -64,7 +63,6 @@ export default function Dashboard() {
     if (!confirm('Tem certeza que deseja cancelar esta reserva?')) return;
 
     try {
-      // ✅ CORRIGIDO: Usando api service com autenticação
       await api.delete(`/api/reservas/${id}`);
       setReservas(reservas.map(r => r.id === id ? { ...r, status: 'cancelada' } : r));
     } catch (error) {
@@ -77,7 +75,6 @@ export default function Dashboard() {
     if (!confirm('Tem certeza que deseja excluir este local?')) return;
 
     try {
-      // ✅ CORRIGIDO: Usando api service com autenticação
       await api.delete(`/api/locais/${id}`);
       setLocais(locais.filter(local => local.id !== id));
     } catch (error) {

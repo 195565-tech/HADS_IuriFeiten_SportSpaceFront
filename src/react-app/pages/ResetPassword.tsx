@@ -1,3 +1,4 @@
+//arquivo é a página de redefinição de senha: ela lê o token de recuperação da URL, valida a nova senha (força requisitos de complexidade) e verifica se a confirmação confere. Depois envia token e nova senha para a API em /api/reset-password
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '@/services/api';

@@ -1,3 +1,4 @@
+//página de cadastro de usuário: ele exibe um formulário para o usuário informar nome, e‑mail, senha, confirmação de senha e o tipo de conta
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -132,7 +133,7 @@ export default function Register() {
               </div>
             </div>
 
-            {/* 👇 Novo campo */}
+            {}
             <div>
               <label htmlFor="userType" className="block text-sm font-medium text-gray-700">
                 Tipo de usuário

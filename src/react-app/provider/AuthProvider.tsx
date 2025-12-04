@@ -1,24 +1,21 @@
+//Armazena valores globais
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+
 const apiUrl = import.meta.env.VITE_API_URL;
 
-// Defina a interface para o objeto de usuário (user)
 interface User {
   user_id: string;
   user_type: 'user' | 'admin' | 'owner';
-  // Adicione outras propriedades do usuário que você usa, como nome ou id
-  // id: number; 
 }
 
-// Defina a interface para o Contexto de Autenticação
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  register: (email: string, password: string) => Promise<void>; // Incluindo o registro
+  register: (email: string, password: string) => Promise<void>;
 }
 
-// O valor padrão do contexto (usei um valor que reflete o estado inicial)
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface AuthProviderProps {
@@ -29,10 +26,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Função para verificar o status de autenticação (usada no useEffect)
   const checkAuth = useCallback(async () => {
     try {
-      // Usa fetch para /api/me e inclui as credenciais (cookies)
       const res = await fetch(`${apiUrl}/api/me`, {
         method: "GET",
         credentials: "include", 
@@ -40,27 +35,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (res.ok) {
         const data = await res.json();
-        // Assume que 'data.user' contém o objeto User
         setUser(data.user); 
       } else {
-        // Se 401 ou 404, o usuário não está autenticado
         setUser(null); 
       }
     } catch (err) {
       console.error("Erro ao verificar sessão:", err);
-      // Mantém o user como null em caso de falha de rede ou CORS
       setUser(null);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // Efeito para checar a autenticação quando o componente é montado
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
   
-  // Função de Registro
   const register = async (email: string, password: string) => {
     setLoading(true);
     try {
@@ -84,7 +74,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
      }
 
       setUser(data.user);
-      // Não faz mais o 'checkAuth' aqui, pois o servidor já retornou o usuário logado
     } catch (err: any) {
       console.error("Erro no registro:", err);
       throw new Error(err.message || "Erro desconhecido ao cadastrar.");
@@ -93,7 +82,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Função de Login
 const login = async (email: string, password: string) => {
   setLoading(true);
   try {
@@ -110,7 +98,6 @@ const login = async (email: string, password: string) => {
 
     const data = await res.json();
     console.log('retorno no login: ', data)
-    // 🔑 Se o servidor retorna um token, salva localmente
     if (data.token) {
       console.log('gravou login')
       localStorage.setItem('token', data.token);
@@ -126,7 +113,6 @@ const login = async (email: string, password: string) => {
 };
 
 
-  // Função de Logout
 const logout = async () => {
   localStorage.removeItem('token');
   setUser(null);
@@ -138,10 +124,9 @@ const logout = async () => {
     loading,
     login,
     logout,
-    register, // Exportando a nova função
+    register,
   };
 
-  // Renderiza os filhos apenas quando a verificação inicial terminar
   return (
     <AuthContext.Provider value={value}>
       {children}
@@ -149,7 +134,6 @@ const logout = async () => {
   );
 };
 
-// Hook customizado para usar a autenticação
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {

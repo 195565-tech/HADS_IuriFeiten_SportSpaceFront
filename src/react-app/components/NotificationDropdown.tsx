@@ -1,3 +1,4 @@
+//componente de sino de notificações no header
 import { useState, useEffect } from 'react';
 import { Bell } from 'lucide-react';
 import api from '../../services/api';

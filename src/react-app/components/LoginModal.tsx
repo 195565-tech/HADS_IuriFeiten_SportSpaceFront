@@ -1,4 +1,6 @@
-// components/LoginModal.tsx
+//define um modal de login que aparece sobre a tela com campos de e‑mail e senha,
+//  usando o contexto de autenticação para chamar a função login. 
+// Ele também possui um fluxo de esqueci minha senha
 import React, { useState } from "react";
 import { useAuth } from "../provider/AuthProvider";
 

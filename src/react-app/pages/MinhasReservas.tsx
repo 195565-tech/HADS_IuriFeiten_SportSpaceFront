@@ -1,3 +1,4 @@
+//página de reservas, onde o usuário logado ve as reservas que fez
 import  { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';

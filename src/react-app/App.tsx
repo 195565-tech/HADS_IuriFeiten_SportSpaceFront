@@ -1,3 +1,4 @@
+//mapeamento de rotas
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "../contexts/AuthContext";
 import LoadingSpinner from "@/react-app/components/LoadingSpinner";
@@ -26,19 +27,19 @@ function AppRoutes() {
 
   return (
     <Routes>
-      {/* Rotas públicas */}
+      {}
       <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/recover" element={<RecoverPage />} />
-      <Route path="/reset-password" element={<ResetPasswordPage />} /> {/* ✅ ADICIONAR ESTA LINHA */}
+      <Route path="/reset-password" element={<ResetPasswordPage />} /> {}
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/local/:id" element={<LocalDetailPage />} />
       <Route path="/reservar-local/:id" element={<ReservarLocalPage />} />
       <Route path="/minhas-reservas" element={<MinhasReservasPage />} />
       <Route path="/locais/:id/editar" element={<EditLocalPage />} />
 
-      {/* Rotas protegidas para proprietários e administradores */}
+      {}
       <Route 
         path="/criar-local" 
         element={

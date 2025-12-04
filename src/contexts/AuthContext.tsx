@@ -1,3 +1,5 @@
+//Arquivo responsável por conter toda a parte de autenticação do front-end//
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import api from '../services/api';
 
@@ -41,7 +43,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const response = await api.get('/api/me'); // ✅ REVERTIDO para /api/me
+      const response = await api.get('/api/me');
       setUser(response.data.user);
     } catch (error) {
       console.log('Usuário não autenticado');
@@ -53,7 +55,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, senha: string) => {
     try {
-      const response = await api.post('/api/login', { email, senha }); // ✅ REVERTIDO para /api/login
+      const response = await api.post('/api/login', { email, senha });
       setUser(response.data.user);
       localStorage.setItem('token', response.data.token);
     } catch (error: any) {
@@ -63,7 +65,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const register = async (nome: string, email: string, senha: string, user_type: UserType = 'user') => {
     try {
-      const response = await api.post('/api/register', { nome, email, senha, user_type }); // ✅ REVERTIDO para /api/register
+      const response = await api.post('/api/register', { nome, email, senha, user_type });
       setUser(response.data.user);
       localStorage.setItem('token', response.data.token);
     } catch (error: any) {
@@ -73,7 +75,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = async () => {
     try {
-      await api.post('/api/logout'); // ✅ REVERTIDO para /api/logout
+      await api.post('/api/logout');
     } catch (error) {
       console.error('Erro no logout:', error);
     } finally {

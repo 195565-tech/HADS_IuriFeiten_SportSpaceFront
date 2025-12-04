@@ -1,3 +1,4 @@
+//busca as informações completas do local pela API e exibe uma galeria, descrição, endereço, telefone, disponibilidade e preço. Também controla quem pode fazer ações
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, MapPin, Phone, DollarSign, Calendar, Clock, Trash2, Edit } from 'lucide-react';
@@ -120,7 +121,7 @@ export default function LocalDetailPage() {
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          {/* Galeria de Fotos */}
+          {}
           <div className="relative">
             <div className="aspect-video overflow-hidden">
               <img 
@@ -156,7 +157,7 @@ export default function LocalDetailPage() {
 
           <div className="p-8">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Informações Principais */}
+              {}
               <div className="lg:col-span-2">
                 <h1 className="text-3xl font-bold text-gray-900 mb-4">
                   {local.nome}
@@ -205,7 +206,7 @@ export default function LocalDetailPage() {
                   )}
                 </div>
 
-                {/* ⚙️ CONTROLE DE EDIÇÃO/EXCLUSÃO */}
+                {}
                 {user && (isAdmin || isOwner) && (
                   <>
                     {(isAdmin || user.user_id === local.user_id) ? (
@@ -234,7 +235,7 @@ export default function LocalDetailPage() {
                 )}
               </div>
 
-              {/* Sidebar */}
+              {}
               <div className="lg:col-span-1">
                 <div className="bg-gray-50 rounded-xl p-6 sticky top-8">
                   {local.valor_hora && (
@@ -299,7 +300,7 @@ export default function LocalDetailPage() {
                     )}
                   </div>
 
-                  {/* Informações do Local */}
+                  {}
                   <div className="mt-6 pt-6 border-t border-gray-200">
                     <div className="flex items-center space-x-2 text-sm text-gray-600">
                       <Clock className="w-4 h-4" />
